@@ -21,6 +21,16 @@
 - **Database & Auth**: Supabase Cloud PostgreSQL, Supabase Auth, TOTP 2FA
 
 ---
+<img width="1893" height="663" alt="image" src="https://github.com/user-attachments/assets/fe0e6c1c-77dd-4a96-81b8-4231ba7595e8" />
+<img width="1907" height="907" alt="image" src="https://github.com/user-attachments/assets/083b8ca1-92fc-469e-bcef-aa6b242a8598" />
+
+<img width="1911" height="911" alt="image" src="https://github.com/user-attachments/assets/40ec4db4-7c08-49e5-b89e-a748c11cfada" />
+<img width="1903" height="912" alt="image" src="https://github.com/user-attachments/assets/6e25dc69-1fd1-434b-80c0-1c85192d49d0" />
+
+---
+
+
+
 
 ## 🚀 วิธีการติดตั้งและเริ่มรันระบบ (Getting Started)
 
