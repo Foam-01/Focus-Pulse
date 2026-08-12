@@ -1,0 +1,21 @@
+{
+  "dailyGoalMinutes": 240,
+  "history": [
+    {
+      "id": "sec_1786517935275_8kfim",
+      "date": "2026-08-12",
+      "time": "13:58",
+      "duration": 25,
+      "tag": "งานทั่วไป",
+      "createdAt": "2026-08-12T06:58:55.275Z"
+    },
+    {
+      "id": "sec_1786516415497_0mmx6",
+      "date": "2026-08-12",
+      "time": "13:33",
+      "duration": 25,
+      "tag": "โฟกัส Pomodoro",
+      "createdAt": "2026-08-12T06:33:35.497Z"
+    }
+  ]
+}

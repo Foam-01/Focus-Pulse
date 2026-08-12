@@ -1,0 +1,79 @@
+'use client';
+
+import React from 'react';
+import { ActiveView } from '../../types';
+import { LayoutDashboard, Timer, Film, ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface SidebarProps {
+  activeView: ActiveView;
+  setActiveView: (view: ActiveView) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeView,
+  setActiveView,
+  isCollapsed,
+  setIsCollapsed,
+}) => {
+  const navItems: { id: ActiveView; title: string; icon: React.ReactNode }[] = [
+    {
+      id: 'dashboardView',
+      title: 'สรุปผลงานรวม',
+      icon: <LayoutDashboard size={20} />,
+    },
+    {
+      id: 'timerView',
+      title: 'นาฬิกาจับเวลาโฟกัส',
+      icon: <Timer size={20} />,
+    },
+    {
+      id: 'videoLibraryView',
+      title: 'คลังวิดีโอผ่อนคลาย',
+      icon: <Film size={20} />,
+    },
+  ];
+
+  return (
+    <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-header">
+        <div className="brand-group">
+          <div className="brand-icon">
+            <Timer size={22} />
+          </div>
+          <div className="brand-text">
+            <span className="brand-name">Focus Pulse</span>
+          </div>
+        </div>
+
+        <button
+          className="sidebar-toggle-btn"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title="สลับย่อ/ขยายเมนูด้านซ้าย"
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+      </div>
+
+      <nav className="sidebar-nav">
+        <div className="nav-section-title">เมนูใช้งานหลัก</div>
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-item ${activeView === item.id ? 'active' : ''}`}
+            onClick={() => setActiveView(item.id)}
+            title={item.title}
+          >
+            <div className="nav-icon">{item.icon}</div>
+            <span className="nav-text">{item.title}</span>
+          </button>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer" style={{ marginTop: 'auto', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        {!isCollapsed && <span>Focus Pulse v1.0</span>}
+      </div>
+    </aside>
+  );
+};

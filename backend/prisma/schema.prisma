@@ -1,0 +1,51 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id
+  email         String         @unique
+  fullName      String?
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  focusSessions FocusSession[]
+  userSettings  UserSettings?
+}
+
+model FocusSession {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String
+  time      String
+  duration  Int
+  tag       String?  @default("โฟกัสทั่วไป")
+  createdAt DateTime @default(now())
+}
+
+model VideoItem {
+  id          String   @id @default(uuid())
+  userId      String?
+  title       String
+  category    String
+  durationStr String
+  src         String
+  poster      String
+  description String
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model UserSettings {
+  id               String   @id @default("default")
+  userId           String?  @unique
+  user             User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyGoalMinutes Int      @default(480)
+  updatedAt        DateTime @updatedAt
+}
