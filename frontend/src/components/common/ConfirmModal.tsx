@@ -16,9 +16,9 @@ interface ConfirmModalProps {
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
-  title = 'ยืนยันการทำรายการ',
+  title = 'ยืนยัน',
   message,
-  confirmText = 'ยืนยันการลบ',
+  confirmText = 'ลบ',
   cancelText = 'ยกเลิก',
   isDanger = true,
   onConfirm,

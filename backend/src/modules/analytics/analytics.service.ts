@@ -42,8 +42,14 @@ export class AnalyticsService {
     // Calculate Streak Days
     const streakDays = this.calculateStreak(history);
 
+    // Pre-aggregate durations by date for O(1) lookup speed
+    const dateMap = new Map<string, number>();
+    history.forEach((record) => {
+      dateMap.set(record.date, (dateMap.get(record.date) || 0) + record.duration);
+    });
+
     // Calculate Chart Data based on timeframe
-    const chartData = this.generateChartData(history, timeframe);
+    const chartData = this.generateChartData(dateMap, timeframe);
 
     return {
       todayMinutes,
@@ -87,7 +93,7 @@ export class AnalyticsService {
     return streak;
   }
 
-  private generateChartData(history: any[], timeframe: 'day' | 'week' | 'month') {
+  private generateChartData(dateMap: Map<string, number>, timeframe: 'day' | 'week' | 'month') {
     const chartMap = new Map<string, number>();
 
     if (timeframe === 'day') {
@@ -97,10 +103,7 @@ export class AnalyticsService {
         const key = d.toLocaleDateString('th-TH', { weekday: 'short' });
         const dateStr = d.toLocaleDateString('sv-SE');
         
-        const dayTotal = history
-          .filter((h) => h.date === dateStr)
-          .reduce((sum, item) => sum + item.duration, 0);
-
+        const dayTotal = dateMap.get(dateStr) || 0;
         chartMap.set(key, dayTotal);
       }
     } else if (timeframe === 'week') {

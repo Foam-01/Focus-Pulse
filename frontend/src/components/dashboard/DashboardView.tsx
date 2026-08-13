@@ -26,7 +26,7 @@ export const DashboardView: React.FC = () => {
   };
 
   if (!summary) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดสถิติแดชบอร์ด...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดข้อมูล...</div>;
   }
 
   const hoursToday = (summary.todayMinutes / 60).toFixed(1).replace('.0', '');
@@ -38,15 +38,15 @@ export const DashboardView: React.FC = () => {
         <KPICard
           title="เวลาโฟกัสวันนี้"
           value={`${summary.todayMinutes} นาที`}
-          sub={`คิดเป็น ~${hoursToday} ชั่วโมง`}
+          sub={`ประมาณ ${hoursToday} ชั่วโมง`}
           accentColor="#60a5fa"
           bgTint="rgba(59, 130, 246, 0.08)"
           borderColor="rgba(59, 130, 246, 0.25)"
         />
         <KPICard
-          title="รอบโฟกัสสำเร็จ"
+          title="รอบที่สำเร็จ"
           value={`${summary.todayRounds} รอบ`}
-          sub="รอบ 25 นาที Pomodoro"
+          sub="รอบละ 25 นาที"
           accentColor="#34d399"
           bgTint="rgba(16, 185, 129, 0.08)"
           borderColor="rgba(16, 185, 129, 0.25)"
@@ -60,9 +60,9 @@ export const DashboardView: React.FC = () => {
           borderColor="rgba(245, 158, 11, 0.25)"
         />
         <KPICard
-          title="ทำงานต่อเนื่องสะสม"
+          title="ทำต่อเนื่อง"
           value={`${summary.streakDays} วัน`}
-          sub="ทำงานโฟกัสต่อเนื่อง"
+          sub="สะสมต่อเนื่อง"
           accentColor="#f472b6"
           bgTint="rgba(236, 72, 153, 0.08)"
           borderColor="rgba(236, 72, 153, 0.25)"

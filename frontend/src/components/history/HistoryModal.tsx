@@ -26,6 +26,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
   const [duration, setDuration] = useState<number>(25);
   const [tag, setTag] = useState<string>('โฟกัสทั่วไป');
 
+  // Edit Form states
+  const [editingRecord, setEditingRecord] = useState<FocusSessionRecord | null>(null);
+  const [editDate, setEditDate] = useState<string>('');
+  const [editTime, setEditTime] = useState<string>('');
+  const [editDuration, setEditDuration] = useState<number>(25);
+  const [editTag, setEditTag] = useState<string>('');
+
   const loadHistory = async () => {
     const data = await ApiService.getHistory();
     setHistory(data);
@@ -44,6 +51,28 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
     await ApiService.createSession({ date, time, duration, tag });
     setShowAddForm(false);
     loadHistory();
+  };
+
+  const handleOpenEdit = (record: FocusSessionRecord) => {
+    setEditingRecord(record);
+    setEditDate(record.date);
+    setEditTime(record.time);
+    setEditDuration(record.duration);
+    setEditTag(record.tag);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingRecord) {
+      await ApiService.updateSession(editingRecord.id, {
+        date: editDate,
+        time: editTime,
+        duration: editDuration,
+        tag: editTag,
+      });
+      setEditingRecord(null);
+      loadHistory();
+    }
   };
 
   const handlePromptDelete = (id: string) => {
@@ -70,10 +99,10 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
           <div>
             <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>
-              ประวัติและบันทึกเวลาโฟกัส
+              ประวัติการทำงาน
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              รายการเซสชันการทำงานย้อนหลังทั้งหมด
+              ประวัติการจับเวลาทั้งหมด
             </p>
           </div>
 
@@ -90,7 +119,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
             onClick={() => setShowAddForm(!showAddForm)}
           >
             <Plus size={16} />
-            <span>เพิ่มบันทึกย้อนหลัง</span>
+            <span>เพิ่มบันทึก</span>
           </button>
 
           {history.length > 0 && (
@@ -100,7 +129,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
               style={{ color: '#f43f5e', borderColor: 'rgba(244, 63, 94, 0.3)', fontWeight: 600 }}
             >
               <RotateCcw size={16} />
-              <span>ล้างประวัติทั้งหมด</span>
+              <span>ลบทั้งหมด</span>
             </button>
           )}
         </div>
@@ -210,8 +239,123 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
           </form>
         )}
 
+        {/* Edit Form */}
+        {editingRecord && (
+          <form
+            onSubmit={handleSaveEdit}
+            style={{
+              background: 'var(--bg-subtle)',
+              padding: '1.2rem',
+              borderRadius: '16px',
+              marginBottom: '1.2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              border: '1px solid var(--blue-sky)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h4 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '0.98rem', fontWeight: 700, color: 'var(--blue-sky)' }}>
+                แก้ไขข้อมูลประวัติการโฟกัส
+              </h4>
+              <button
+                type="button"
+                className="action-btn-secondary"
+                onClick={() => setEditingRecord(null)}
+                style={{ padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
+              >
+                ยกเลิก
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700 }}>วันที่</label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-card)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700 }}>เวลา</label>
+                <input
+                  type="time"
+                  value={editTime}
+                  onChange={(e) => setEditTime(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-card)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700 }}>ระยะเวลา (นาที)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="480"
+                  value={editDuration}
+                  onChange={(e) => setEditDuration(parseInt(e.target.value, 10))}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-card)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700 }}>หมวดหมู่ / แท็ก</label>
+                <input
+                  type="text"
+                  value={editTag}
+                  onChange={(e) => setEditTag(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-card)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="btn-primary-gradient"
+              style={{ marginTop: '0.5rem', padding: '0.65rem', fontWeight: 700 }}
+            >
+              บันทึกการแก้ไข
+            </button>
+          </form>
+        )}
+
         {/* History Table */}
-        <HistoryTable history={history} onDelete={handlePromptDelete} />
+        <HistoryTable history={history} onDelete={handlePromptDelete} onEdit={handleOpenEdit} />
 
         {/* Single Item Delete Confirm Modal */}
         <ConfirmModal

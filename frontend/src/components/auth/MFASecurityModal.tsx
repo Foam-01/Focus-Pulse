@@ -149,13 +149,13 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
         {/* Modal Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 800, marginBottom: '0.3rem' }}>
-            <ShieldCheck size={16} /> Multi-Factor Authentication (2FA)
+            <ShieldCheck size={16} /> การยืนยันตัวตน 2 ชั้น (2FA)
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            การยืนยันตัวตน 2 ชั้น
+            ตั้งค่าความปลอดภัย 2FA
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem', fontWeight: 600 }}>
-            ผูกกับแอป Authenticator (Google Authenticator / Authy / 1Password) เพื่อความปลอดภัยสูงสุด
+            สแกนด้วยแอป Authenticator เช่น Google Authenticator เพื่อเพิ่มความปลอดภัย
           </p>
         </div>
 
@@ -183,10 +183,10 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
               <CheckCircle2 size={36} />
             </div>
             <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-              เปิดใช้งาน 2FA เรียบร้อยแล้ว!
+              เปิดใช้งาน 2FA แล้ว
             </h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, fontWeight: 500 }}>
-              บัญชีของคุณได้รับการปกป้องด้วยระบบการยืนยันตัวตน 2 ชั้น (Multi-Factor Authentication) เรียบร้อยแล้ว
+              บัญชีของคุณเปิดใช้งานการยืนยันตัวตน 2 ชั้นเรียบร้อยแล้ว
             </p>
           </div>
         ) : !qrCodeSvg ? (
@@ -195,7 +195,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
               <Lock size={28} />
             </div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5, fontWeight: 600 }}>
-              คลิกปุ่มด้านล่างเพื่อสแกน QR Code และผูกกับแอป Google Authenticator หรือฮาร์ดแวร์คีย์ของคุณ
+              กดปุ่มด้านล่างเพื่อแสดง QR Code สำหรับสแกนผูกแอป Authenticator
             </p>
             <button
               onClick={handleEnrollMFA}
@@ -213,7 +213,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
                 gap: '0.5rem',
               }}
             >
-              <QrCode size={18} /> {loading ? 'กำลังเจนรหัส...' : 'เริ่มผูกระบบ 2FA'}
+              <QrCode size={18} /> {loading ? 'กำลังสร้าง...' : 'เริ่มตั้งค่า 2FA'}
             </button>
           </div>
         ) : (
@@ -231,7 +231,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
 
             <form onSubmit={handleVerifyMFA} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <label style={{ fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 700 }}>
-                กรอกรหัส 6 หลักจากแอป Authenticator เพื่อยืนยัน:
+                กรอกรหัส 6 หลักจากแอป Authenticator:
               </label>
               <div style={{ position: 'relative' }}>
                 <Key size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--blue-sky)' }} />
@@ -271,7 +271,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
                   marginTop: '0.4rem',
                 }}
               >
-                {loading ? 'กำลังตรวจสอบ...' : 'ยืนยันและเปิดใช้งาน 2FA'}
+                {loading ? 'กำลังตรวจสอบ...' : 'ยืนยัน'}
               </button>
             </form>
           </div>

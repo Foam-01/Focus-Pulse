@@ -4,8 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ApiService } from '../../services/api';
 import { VideoItem, AnalyticsSummary, FocusSessionRecord } from '../../types';
 import { VideoModal } from '../videos/VideoModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 import { TimerCircle } from './TimerCircle';
-import { Play, Pause, RotateCcw, Zap, ChevronUp, ChevronDown, Clock, CheckCircle2, History, BookOpen, Code, Palette, Briefcase } from 'lucide-react';
+import { Play, Pause, RotateCcw, Zap, ChevronUp, ChevronDown, Clock, CheckCircle2, History, BookOpen, Code, Palette, Briefcase, Plus, Pencil, Trash2, X } from 'lucide-react';
 
 export const TimerView: React.FC = () => {
   const [focusMinutes, setFocusMinutes] = useState<number>(25);
@@ -28,6 +29,16 @@ export const TimerView: React.FC = () => {
 
   const [recentHistory, setRecentHistory] = useState<FocusSessionRecord[]>([]);
 
+  // History CRUD state
+  const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+  const [showAddHistoryModal, setShowAddHistoryModal] = useState<boolean>(false);
+  const [editingHistoryRecord, setEditingHistoryRecord] = useState<FocusSessionRecord | null>(null);
+
+  const [histDate, setHistDate] = useState<string>(new Date().toLocaleDateString('sv-SE'));
+  const [histTime, setHistTime] = useState<string>('12:00');
+  const [histDuration, setHistDuration] = useState<number>(25);
+  const [histTag, setHistTag] = useState<string>('งานทั่วไป');
+
   // Reward Video Modal state
   const [rewardVideo, setRewardVideo] = useState<VideoItem | null>(null);
   const [showRewardModal, setShowRewardModal] = useState<boolean>(false);
@@ -40,6 +51,57 @@ export const TimerView: React.FC = () => {
     setAnalytics(summary);
     const historyList = await ApiService.getHistory();
     setRecentHistory(historyList.slice(0, 5));
+  };
+
+  const handleOpenAddHistory = () => {
+    const now = new Date();
+    setHistDate(now.toLocaleDateString('sv-SE'));
+    setHistTime(now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
+    setHistDuration(25);
+    setHistTag('งานทั่วไป');
+    setShowAddHistoryModal(true);
+  };
+
+  const handleSaveAddHistory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await ApiService.createSession({
+      date: histDate,
+      time: histTime,
+      duration: histDuration,
+      tag: histTag,
+    });
+    setShowAddHistoryModal(false);
+    await loadData();
+  };
+
+  const handleOpenEditHistory = (record: FocusSessionRecord) => {
+    setEditingHistoryRecord(record);
+    setHistDate(record.date);
+    setHistTime(record.time);
+    setHistDuration(record.duration);
+    setHistTag(record.tag || 'งานทั่วไป');
+  };
+
+  const handleSaveEditHistory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingHistoryRecord) {
+      await ApiService.updateSession(editingHistoryRecord.id, {
+        date: histDate,
+        time: histTime,
+        duration: histDuration,
+        tag: histTag,
+      });
+      setEditingHistoryRecord(null);
+      await loadData();
+    }
+  };
+
+  const handleConfirmDeleteHistory = async () => {
+    if (deletingHistoryId) {
+      await ApiService.deleteSession(deletingHistoryId);
+      setDeletingHistoryId(null);
+      await loadData();
+    }
   };
 
   useEffect(() => {
@@ -228,20 +290,17 @@ export const TimerView: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
             <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.3px' }}>
-              เตรียมตัวลุยงาน
+              ลุยงานกันเลย
             </h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'var(--bg-subtle)', color: 'var(--blue-sky)', padding: '0.25rem 0.75rem', borderRadius: '14px', fontSize: '0.78rem', fontWeight: 600 }}>
-              <Clock size={14} /> โหมดตั้งสมาธิ
-            </div>
           </div>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-            เตรียมพร้อมจับเวลาทำงาน เมื่อครบกำหนดเวลาระบบจะเปิดวิดีโอผ่อนคลายให้พักสายตาโดยอัตโนมัติ
+            ตั้งเวลาที่คุณต้องการทำงาน เมื่อครบกำหนดเวลา ระบบจะเล่นวิดีโอพักสายตาให้คุณผ่อนคลายทันที
           </p>
 
           {/* Category / Tag Selector */}
           <div style={{ marginBottom: '1.4rem' }}>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>
-              เลือกประเภทงานที่ลุยอยู่:
+              ประเภทงาน:
             </span>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {tagOptions.map((t) => {
@@ -317,10 +376,10 @@ export const TimerView: React.FC = () => {
                     cursor: isRunning ? 'not-allowed' : 'text',
                     transition: 'all 0.2s ease',
                   }}
-                  title={isRunning ? 'กำลังจับเวลา ไม่สามารถแก้ไขเวลาได้' : 'คลิกเพื่อพิมพ์ระบุจำนวนนาทีเอง (ขอบเขต 1 - 480 นาที)'}
+                  title={isRunning ? 'กำลังจับเวลา' : 'พิมพ์ระบุจำนวนนาที (1 - 480 นาที)'}
                 />
                 <span style={{ display: 'block', fontSize: '0.82rem', color: 'var(--blue-sky)', fontWeight: 600, marginTop: '2px' }}>
-                  นาที (คลิกพิมพ์ระบุเลขได้)
+                  นาที
                 </span>
               </div>
 
@@ -340,7 +399,7 @@ export const TimerView: React.FC = () => {
                     justifyContent: 'center',
                     transition: 'all 0.2s ease',
                   }}
-                  title="เพิ่มเวลา 5 นาที"
+                  title="เพิ่ม 5 นาที"
                 >
                   <ChevronUp size={20} />
                 </button>
@@ -359,7 +418,7 @@ export const TimerView: React.FC = () => {
                     justifyContent: 'center',
                     transition: 'all 0.2s ease',
                   }}
-                  title="ลดเวลา 5 นาที"
+                  title="ลด 5 นาที"
                 >
                   <ChevronDown size={20} />
                 </button>
@@ -368,7 +427,7 @@ export const TimerView: React.FC = () => {
           </div>
 
           <p style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.2rem', fontWeight: 500 }}>
-            {focusMinutes <= 25 ? 'ลุยยาวรวดเดียว ไม่มีเวลาพัก' : 'มีเวลาพักสั้นๆ หลังจบช่วงงาน'}
+            {focusMinutes <= 25 ? 'รอบทำงานทั่วไป' : 'รอบทำงานยาว'}
           </p>
 
           {/* Preset Pills */}
@@ -422,15 +481,15 @@ export const TimerView: React.FC = () => {
             }}
           >
             {isRunning ? <Pause size={22} /> : <Play size={22} />}
-            <span>{isRunning ? 'พักชั่วคราว' : 'เริ่มลุยงาน'}</span>
+            <span>{isRunning ? 'หยุดชั่วคราว' : 'เริ่ม'}</span>
           </button>
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button className="action-btn-secondary" onClick={resetTimer} style={{ flex: 1, padding: '0.7rem' }}>
-              <RotateCcw size={16} /> <span>เริ่มใหม่</span>
+              <RotateCcw size={16} /> <span>รีเซ็ต</span>
             </button>
             <button className="action-btn-secondary" onClick={testQuickFinish} style={{ flex: 1, padding: '0.7rem' }}>
-              <Zap size={16} /> <span>ทดสอบระบบ</span>
+              <Zap size={16} /> <span>ทดสอบ</span>
             </button>
           </div>
         </div>
@@ -455,10 +514,10 @@ export const TimerView: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
             <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.3px' }}>
-              สรุปผลงานวันนี้
+              สรุปผลวันนี้
             </h2>
             <span style={{ fontSize: '0.95rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.35rem 1rem', borderRadius: '16px', fontWeight: 700 }}>
-              สรุปภาพรวม
+              ภาพรวม
             </span>
           </div>
 
@@ -548,23 +607,27 @@ export const TimerView: React.FC = () => {
         {/* MIDDLE SECTION: ประวัติการลุยงานล่าสุด */}
         <div style={{ paddingTop: '1.2rem', borderTop: '1px solid var(--border-card)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--bg-subtle)', color: 'var(--blue-sky)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <History size={19} />
-              </div>
-              <div>
-                <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
-                  ประวัติการโฟกัสล่าสุด (Recent Completed Rounds)
-                </h3>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                  รายการรอบการทำงานที่ทำเสร็จล่าสุดเพื่อติดตามความต่อเนื่อง
-                </p>
-              </div>
+            <div>
+              <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                ประวัติการโฟกัสล่าสุด
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                รายการรอบการทำงานที่ทำเสร็จล่าสุดเพื่อติดตามความต่อเนื่อง
+              </p>
             </div>
 
-            <span style={{ fontSize: '0.82rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.22rem 0.75rem', borderRadius: '10px', fontWeight: 700 }}>
-              {recentHistory.length} รอบล่าสุด
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <button
+                className="btn-primary-gradient"
+                onClick={handleOpenAddHistory}
+                style={{ padding: '0.4rem 0.85rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+              >
+                <Plus size={15} /> เพิ่มบันทึก
+              </button>
+              <span style={{ fontSize: '0.82rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.4rem 0.75rem', borderRadius: '10px', fontWeight: 700 }}>
+                {recentHistory.length} รอบล่าสุด
+              </span>
+            </div>
           </div>
 
           {recentHistory.length === 0 ? (
@@ -581,6 +644,7 @@ export const TimerView: React.FC = () => {
                     <th>ระยะเวลา</th>
                     <th>หมวดหมู่งาน</th>
                     <th>สถานะ</th>
+                    <th style={{ textAlign: 'right' }}>จัดการ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -601,6 +665,24 @@ export const TimerView: React.FC = () => {
                           <CheckCircle2 size={14} /> สำเร็จ 1 รอบ
                         </span>
                       </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => handleOpenEditHistory(item)}
+                            style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--blue-sky)', padding: '0.3rem 0.55rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.78rem', fontWeight: 600 }}
+                            title="แก้ไขรายการนี้"
+                          >
+                            <Pencil size={13} /> แก้ไข
+                          </button>
+                          <button
+                            onClick={() => setDeletingHistoryId(item.id)}
+                            style={{ background: 'rgba(244, 63, 94, 0.08)', border: '1px solid rgba(244, 63, 94, 0.2)', color: '#f43f5e', padding: '0.3rem 0.55rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.78rem', fontWeight: 600 }}
+                            title="ลบรายการนี้"
+                          >
+                            <Trash2 size={13} /> ลบ
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -609,6 +691,152 @@ export const TimerView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* ADD History Modal */}
+      {showAddHistoryModal && (
+        <div className="modal-overlay" onClick={() => setShowAddHistoryModal(false)}>
+          <div className="modal-content-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px', borderRadius: '24px', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-card)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
+              <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.2rem', fontWeight: 800 }}>
+                เพิ่มบันทึกรอบโฟกัสย้อนหลัง
+              </h3>
+              <button onClick={() => setShowAddHistoryModal(false)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveAddHistory} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>วันที่</label>
+                  <input
+                    type="date"
+                    required
+                    value={histDate}
+                    onChange={(e) => setHistDate(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>เวลา</label>
+                  <input
+                    type="time"
+                    required
+                    value={histTime}
+                    onChange={(e) => setHistTime(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>ระยะเวลา (นาที)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="480"
+                    required
+                    value={histDuration}
+                    onChange={(e) => setHistDuration(parseInt(e.target.value, 10))}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>หมวดหมู่งาน</label>
+                  <input
+                    type="text"
+                    required
+                    value={histTag}
+                    onChange={(e) => setHistTag(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+              </div>
+              <button type="submit" className="btn-primary-gradient" style={{ marginTop: '0.5rem', padding: '0.75rem', borderRadius: '12px', fontWeight: 700 }}>
+                บันทึกประวัติใหม่
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT History Modal */}
+      {editingHistoryRecord && (
+        <div className="modal-overlay" onClick={() => setEditingHistoryRecord(null)}>
+          <div className="modal-content-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px', borderRadius: '24px', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-card)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
+              <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.2rem', fontWeight: 800, color: 'var(--blue-sky)' }}>
+                แก้ไขข้อมูลรอบโฟกัส
+              </h3>
+              <button onClick={() => setEditingHistoryRecord(null)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveEditHistory} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>วันที่</label>
+                  <input
+                    type="date"
+                    required
+                    value={histDate}
+                    onChange={(e) => setHistDate(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>เวลา</label>
+                  <input
+                    type="time"
+                    required
+                    value={histTime}
+                    onChange={(e) => setHistTime(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>ระยะเวลา (นาที)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="480"
+                    required
+                    value={histDuration}
+                    onChange={(e) => setHistDuration(parseInt(e.target.value, 10))}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>หมวดหมู่งาน</label>
+                  <input
+                    type="text"
+                    required
+                    value={histTag}
+                    onChange={(e) => setHistTag(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '10px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)' }}
+                  />
+                </div>
+              </div>
+              <button type="submit" className="btn-primary-gradient" style={{ marginTop: '0.5rem', padding: '0.75rem', borderRadius: '12px', fontWeight: 700 }}>
+                บันทึกการแก้ไข
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE History Confirm Modal */}
+      <ConfirmModal
+        isOpen={deletingHistoryId !== null}
+        title="ยืนยันการลบประวัติ"
+        message="คุณต้องการลบรายการรอบโฟกัสนี้ใช่หรือไม่?"
+        confirmText="ยืนยันการลบ"
+        cancelText="ยกเลิก"
+        isDanger={true}
+        onConfirm={handleConfirmDeleteHistory}
+        onCancel={() => setDeletingHistoryId(null)}
+      />
 
       {/* Reward Video Popup Modal upon completion */}
       {showRewardModal && rewardVideo && (

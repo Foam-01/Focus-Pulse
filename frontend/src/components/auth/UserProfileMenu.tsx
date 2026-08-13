@@ -33,7 +33,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user, onOpenAu
           transition: 'all 0.2s ease',
         }}
       >
-        <User size={16} /> <span>เข้าสู่ระบบ / สมัครสมาชิก</span>
+        <User size={16} /> <span>เข้าสู่ระบบ</span>
       </button>
     );
   }

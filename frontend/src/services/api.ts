@@ -67,6 +67,36 @@ export const ApiService = {
     return true;
   },
 
+  async updateSession(id: string, session: { date?: string; time?: string; duration?: number; tag?: string }): Promise<FocusSessionRecord | null> {
+    try {
+      const res = await fetch(`${API_BASE}/focus/history/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(session),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Backend API unreachable, updating in LocalStorage.');
+    }
+
+    const current = await this.getHistory();
+    const idx = current.findIndex((item) => item.id === id);
+    if (idx !== -1) {
+      current[idx] = {
+        ...current[idx],
+        ...(session.date && { date: session.date }),
+        ...(session.time && { time: session.time }),
+        ...(session.duration !== undefined && { duration: Number(session.duration) }),
+        ...(session.tag && { tag: session.tag }),
+      };
+      localStorage.setItem('focus_history_list', JSON.stringify(current));
+      return current[idx];
+    }
+    return null;
+  },
+
   async resetAllHistory(): Promise<boolean> {
     try {
       const res = await fetch(`${API_BASE}/focus/history`, { method: 'DELETE' });

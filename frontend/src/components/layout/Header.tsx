@@ -17,16 +17,16 @@ interface HeaderProps {
 
 const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
   dashboardView: {
-    title: 'แดชบอร์ดสรุปเวลาโฟกัส',
-    sub: 'วิเคราะห์สถิติเวลาและเป้าหมายประจำวัน',
+    title: 'สรุปผลงาน',
+    sub: 'สถิติเวลาโฟกัสและเป้าหมายประจำวัน',
   },
   timerView: {
-    title: 'นาฬิกาจับเวลาโฟกัส',
-    sub: 'จับเวลาการทำงาน 25 นาทีสไตล์ Pomodoro',
+    title: 'จับเวลาโฟกัส',
+    sub: 'จับเวลาทำงาน 25 นาที แบบ Pomodoro',
   },
   videoLibraryView: {
-    title: 'คลังวิดีโอผ่อนคลาย',
-    sub: 'คลังวิดีโอพักสายตาและสื่อเพื่อการผ่อนคลาย',
+    title: 'วิดีโอพักสายตา',
+    sub: 'วิดีโอผ่อนคลายสำหรับเล่นเมื่อหมดเวลาโฟกัส',
   },
 };
 
@@ -57,12 +57,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <button className="action-btn-secondary" onClick={onOpenHistoryModal}>
           <History size={18} />
-          <span>ประวัติการทำงาน</span>
+          <span>ประวัติ</span>
         </button>
 
-        <button className="theme-toggle-btn" onClick={toggleTheme} title="สลับธีม สว่าง/มืด">
+        <button className="theme-toggle-btn" onClick={toggleTheme} title="สลับธีม">
           {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-          <span>{theme === 'dark' ? 'ธีมมืด' : 'ธีมสว่าง'}</span>
+          <span>{theme === 'dark' ? 'มืด' : 'สว่าง'}</span>
         </button>
 
         {/* User Profile / Login Button */}

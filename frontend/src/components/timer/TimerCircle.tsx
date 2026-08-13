@@ -7,7 +7,7 @@ interface TimerCircleProps {
   sessionStatus: string;
 }
 
-export const TimerCircle: React.FC<TimerCircleProps> = ({
+export const TimerCircle: React.FC<TimerCircleProps> = React.memo(({
   remainingSeconds,
   totalSeconds,
   formattedTime,
@@ -42,4 +42,6 @@ export const TimerCircle: React.FC<TimerCircleProps> = ({
       </div>
     </div>
   );
-};
+});
+
+TimerCircle.displayName = 'TimerCircle';

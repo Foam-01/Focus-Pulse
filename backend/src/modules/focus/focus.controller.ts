@@ -10,7 +10,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FocusService, FocusSessionRecord } from './focus.service';
-import { CreateSessionDto, UpdateGoalDto } from './dto/create-session.dto';
+import { CreateSessionDto, UpdateGoalDto, UpdateSessionDto } from './dto/create-session.dto';
 
 @Controller('focus')
 export class FocusController {
@@ -33,6 +33,15 @@ export class FocusController {
       throw new NotFoundException(`Session record with ID ${id} not found`);
     }
     return { success: true, message: 'Deleted successfully' };
+  }
+
+  @Post('history/:id')
+  async updateSessionPost(@Param('id') id: string, @Body() dto: UpdateSessionDto) {
+    const updated = await this.focusService.updateSession(id, dto);
+    if (!updated) {
+      throw new NotFoundException(`Session record with ID ${id} not found`);
+    }
+    return updated;
   }
 
   @Delete('history')

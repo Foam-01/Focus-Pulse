@@ -3,15 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import { ActiveView } from '../types';
 import { supabase } from '../lib/supabase';
+import dynamic from 'next/dynamic';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
 import { DashboardView } from '../components/dashboard/DashboardView';
 import { TimerView } from '../components/timer/TimerView';
-import { VideoLibraryView } from '../components/videos/VideoLibraryView';
-import { HistoryModal } from '../components/history/HistoryModal';
-import { AuthModal } from '../components/auth/AuthModal';
-import { MFASecurityModal } from '../components/auth/MFASecurityModal';
 import { LoginPage } from '../components/auth/LoginPage';
+
+// Dynamic imports for secondary views & modals to optimize initial JS bundle size
+const VideoLibraryView = dynamic(
+  () => import('../components/videos/VideoLibraryView').then((mod) => mod.VideoLibraryView),
+  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดคลังวิดีโอ...</div> }
+);
+
+const HistoryModal = dynamic(
+  () => import('../components/history/HistoryModal').then((mod) => mod.HistoryModal)
+);
+
+const AuthModal = dynamic(
+  () => import('../components/auth/AuthModal').then((mod) => mod.AuthModal)
+);
+
+const MFASecurityModal = dynamic(
+  () => import('../components/auth/MFASecurityModal').then((mod) => mod.MFASecurityModal)
+);
 
 export default function HomePage() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboardView');

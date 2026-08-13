@@ -20,17 +20,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems: { id: ActiveView; title: string; icon: React.ReactNode }[] = [
     {
       id: 'dashboardView',
-      title: 'สรุปผลงานรวม',
+      title: 'สรุปผลงาน',
       icon: <LayoutDashboard size={20} />,
     },
     {
       id: 'timerView',
-      title: 'นาฬิกาจับเวลาโฟกัส',
+      title: 'จับเวลา',
       icon: <Timer size={20} />,
     },
     {
       id: 'videoLibraryView',
-      title: 'คลังวิดีโอผ่อนคลาย',
+      title: 'วิดีโอผ่อนคลาย',
       icon: <Film size={20} />,
     },
   ];
@@ -50,14 +50,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button
           className="sidebar-toggle-btn"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          title="สลับย่อ/ขยายเมนูด้านซ้าย"
+          title="ย่อ/ขยายเมนู"
         >
           {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section-title">เมนูใช้งานหลัก</div>
+        <div className="nav-section-title">เมนู</div>
         {navItems.map((item) => (
           <button
             key={item.id}

@@ -32,30 +32,12 @@ export const GoalStepper: React.FC<GoalStepperProps> = ({ dailyGoalMinutes, onUp
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '16px',
-              background: 'var(--bg-subtle)',
-              border: '1px solid var(--border-light)',
-              color: 'var(--blue-sky)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Target size={24} />
-          </div>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--blue-sky)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.15rem' }}>
-              <Sparkles size={13} /> กำหนดเป้าหมายเวลาโฟกัส
-            </div>
             <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
-              ปรับแต่งเป้าหมายเวลาโฟกัสประจำวัน
+              ตั้งเป้าหมายเวลาโฟกัส
             </h3>
             <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              กำหนดเป้าหมายชั่วโมงทำงานที่คุณต้องการพิชิตในแต่ละวัน
+              กำหนดเวลาทำงานที่คุณต้องการทำในแต่ละวัน
             </p>
           </div>
         </div>

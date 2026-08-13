@@ -31,22 +31,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
     try {
       if (mode === 'register') {
-        const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            data: { full_name: name.trim() || 'สมาชิก Focus Pulse' },
-          },
-        });
+        let signUpUser = null;
+        let signUpSession = null;
 
-        if (error) throw error;
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email: cleanEmail,
+            password,
+            options: {
+              data: { full_name: name.trim() || 'สมาชิก Focus Pulse' },
+            },
+          });
 
-        if (data.user) {
-          setSuccessMsg('สมัครสมาชิกสำเร็จเรียบร้อยแล้ว!');
-          setTimeout(() => {
-            onSuccess(data.user);
-            onClose();
-          }, 1200);
+          if (error) throw error;
+          signUpUser = data.user;
+          signUpSession = data.session;
+        } catch (regErr: any) {
+          const regErrMsg = regErr.message || '';
+          if (regErrMsg.includes('rate limit') || regErrMsg.includes('already registered')) {
+            const { data: directSignIn } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password,
+            });
+
+            if (directSignIn?.user) {
+              setSuccessMsg('เข้าสู่ระบบด้วยบัญชีของคุณเรียบร้อยแล้ว!');
+              setTimeout(() => {
+                onSuccess(directSignIn.user);
+                onClose();
+              }, 800);
+              return;
+            }
+          }
+          throw regErr;
+        }
+
+        if (signUpUser) {
+          if (signUpSession) {
+            setSuccessMsg('สมัครสมาชิกสำเร็จเรียบร้อยแล้ว!');
+            setTimeout(() => {
+              onSuccess(signUpUser);
+              onClose();
+            }, 800);
+          } else {
+            const { data: signInData } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password,
+            });
+
+            if (signInData?.user) {
+              setSuccessMsg('สมัครสมาชิกสำเร็จและเข้าสู่ระบบเรียบร้อยแล้ว!');
+              setTimeout(() => {
+                onSuccess(signInData.user);
+                onClose();
+              }, 800);
+            } else {
+              setSuccessMsg('สมัครสมาชิกสำเร็จแล้ว! คุณสามารถเข้าสู่ระบบได้ทันที');
+              setMode('login');
+            }
+          }
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -61,17 +104,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           setTimeout(() => {
             onSuccess(data.user);
             onClose();
-          }, 1000);
+          }, 800);
         }
       }
     } catch (err: any) {
       let rawMsg = err.message || '';
       if (rawMsg.includes('Invalid login credentials')) {
-        setErrorMsg('อีเมลหรือรหัสผ่านไม่ถูกต้อง (หากเพิ่งสมัครสมาชิก โปรดตรวจสอบว่าได้ปิด Confirm Email ใน Supabase Dashboard หรือยัง)');
+        setErrorMsg('อีเมลหรือรหัสผ่านไม่ถูกต้อง (หากเพิ่งสมัครสมาชิก โปรดปิด Confirm Email ใน Supabase Dashboard)');
       } else if (rawMsg.includes('rate limit')) {
-        setErrorMsg('เกินโควตาการส่งอีเมลของ Supabase ชั่วคราว (Email Rate Limit) โปรดปิด Confirm Email บน Supabase Dashboard');
+        setErrorMsg('เกินโควตาการส่งอีเมลของ Supabase ชั่วคราว (Email Rate Limit) 💡 วิธีแก้: เข้า Supabase Dashboard -> Authentication -> Providers -> Email -> ปิด Confirm email');
       } else if (rawMsg.includes('invalid') || rawMsg.includes('Email address')) {
-        setErrorMsg('รูปแบบอีเมลไม่ถูกต้อง โปรดเว้นช่องว่างหน้า/หลังออก หรือลองใช้อีเมลจริงของคุณ (เช่น yourname@gmail.com)');
+        setErrorMsg('รูปแบบอีเมลไม่ถูกต้อง โปรดตรวจสอบช่องว่างหรือลองใช้อีเมลอื่น');
       } else if (rawMsg.includes('already registered')) {
         setErrorMsg('อีเมลนี้ได้รับการสมัครสมาชิกไว้แล้ว โปรดกดสลับเป็นแท็บ "เข้าสู่ระบบ"');
       } else {

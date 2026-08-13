@@ -69,7 +69,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
           <div>
             {isRewardMode && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-subtle)', color: 'var(--blue-sky)', padding: '0.28rem 0.85rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-                <Sparkles size={15} /> ยินดีด้วย! คุณโฟกัสครบตามเวลาที่กำหนดแล้ว
+                <Sparkles size={15} /> ครบกำหนดเวลาแล้ว
               </div>
             )}
             <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>
@@ -94,7 +94,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               flexShrink: 0,
               transition: 'all 0.2s ease',
             }}
-            title="ปิดหน้าต่าง"
+            title="ปิด"
           >
             <X size={20} />
           </button>
@@ -148,7 +148,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               }}
             >
               <CheckCircle size={20} />
-              <span>เสร็จสิ้นเซสชัน 1 รอบ (Finish Session)</span>
+              <span>บันทึกรอบนี้</span>
             </button>
           ) : (
             <button
@@ -164,7 +164,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
                 fontWeight: 600,
               }}
             >
-              ปิดหน้าต่าง
+              ปิด
             </button>
           )}
         </div>

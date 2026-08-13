@@ -131,13 +131,13 @@ export const VideoLibraryView: React.FC = () => {
       >
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> คลังวิดีโอพักสายตาและผ่อนคลาย
+            <Sparkles size={14} /> วิดีโอสำหรับช่วงพัก
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
             คลังวิดีโอผ่อนคลาย
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            วิดีโอหลักจะถูกจัดอยู่อันดับที่ 1 เสมอ เพื่อเปิดเล่นให้อัตโนมัติเมื่อนาฬิกาจับเวลาโฟกัสทำงานเสร็จสิ้น
+            วิดีโอหลักจะเล่นให้อัตโนมัติเมื่อหมดเวลาโฟกัส
           </p>
         </div>
 
@@ -147,7 +147,7 @@ export const VideoLibraryView: React.FC = () => {
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.4rem', borderRadius: '14px', fontWeight: 700 }}
         >
           <Upload size={18} />
-          <span>เพิ่มวิดีโอใหม่</span>
+          <span>เพิ่มวิดีโอ</span>
         </button>
       </div>
 
@@ -210,7 +210,7 @@ export const VideoLibraryView: React.FC = () => {
                       zIndex: 3,
                     }}
                   >
-                    <Star size={13} fill="#ffffff" /> อันดับ 1 • วิดีโอหลักสำหรับผ่อนคลาย
+                    <Star size={13} fill="#ffffff" /> วิดีโอหลัก
                   </div>
                 )}
               </div>
@@ -324,9 +324,9 @@ export const VideoLibraryView: React.FC = () => {
       {/* Custom Confirmation Modal for Deleting Video */}
       <ConfirmModal
         isOpen={deletingVideoId !== null}
-        title="ยืนยันการลบวิดีโอ"
-        message="คุณต้องการลบวิดีโอนี้ออกจากคลังวิดีโอผ่อนคลายใช่หรือไม่?"
-        confirmText="ยืนยันการลบ"
+        title="ลบวิดีโอ"
+        message="คุณต้องการลบวิดีโอนี้ใช่หรือไม่?"
+        confirmText="ลบ"
         cancelText="ยกเลิก"
         isDanger={true}
         onConfirm={handleConfirmDeleteVideo}
@@ -339,7 +339,7 @@ export const VideoLibraryView: React.FC = () => {
           <div className="modal-content-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', borderRadius: '24px', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-card)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
               <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                แก้ไขข้อมูลวิดีโอ
+                แก้ไขวิดีโอ
               </h3>
               <button onClick={() => setEditingVideo(null)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <X size={18} />
@@ -374,7 +374,7 @@ export const VideoLibraryView: React.FC = () => {
 
               <div>
                 <label style={{ fontSize: '0.86rem', color: 'var(--text-main)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
-                  ที่อยู่ไฟล์วิดีโอ / ลิงก์วิดีโอ
+                  ลิงก์วิดีโอ
                 </label>
                 <input
                   type="text"
@@ -386,7 +386,7 @@ export const VideoLibraryView: React.FC = () => {
 
               <div>
                 <label style={{ fontSize: '0.86rem', color: 'var(--text-main)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
-                  คำอธิบายวิดีโอ
+                  คำอธิบาย
                 </label>
                 <textarea
                   rows={3}
@@ -401,7 +401,7 @@ export const VideoLibraryView: React.FC = () => {
                   ยกเลิก
                 </button>
                 <button type="submit" className="btn-primary-gradient" disabled={isEditing} style={{ padding: '0.75rem 1.4rem', fontWeight: 700 }}>
-                  {isEditing ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+                  {isEditing ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>
               </div>
             </form>
@@ -415,7 +415,7 @@ export const VideoLibraryView: React.FC = () => {
           <div className="modal-content-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', borderRadius: '24px', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-card)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
               <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                อัปโหลดวิดีโอผ่อนคลายใหม่
+                เพิ่มวิดีโอ
               </h3>
               <button onClick={() => setShowUploadModal(false)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <X size={18} />
@@ -430,7 +430,7 @@ export const VideoLibraryView: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="เช่น เสียงฝนตกกลางคืน, ดนตรีคาเฟ่"
+                  placeholder="เช่น เสียงฝนตก, ดนตรีคาเฟ่"
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
                   style={{ width: '100%', padding: '0.75rem 0.9rem', borderRadius: '12px', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--text-main)', fontSize: '0.92rem', outline: 'none' }}
@@ -464,7 +464,7 @@ export const VideoLibraryView: React.FC = () => {
 
               <div>
                 <label style={{ fontSize: '0.86rem', color: 'var(--text-main)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
-                  คำอธิบายวิดีโอ
+                  คำอธิบาย
                 </label>
                 <textarea
                   rows={3}
@@ -480,7 +480,7 @@ export const VideoLibraryView: React.FC = () => {
                   ยกเลิก
                 </button>
                 <button type="submit" className="btn-primary-gradient" disabled={isUploading} style={{ padding: '0.75rem 1.4rem', fontWeight: 700 }}>
-                  {isUploading ? 'กำลังบันทึก...' : 'บันทึกวิดีโอ'}
+                  {isUploading ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>
               </div>
             </form>

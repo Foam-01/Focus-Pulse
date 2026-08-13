@@ -9,7 +9,7 @@ interface KPICardProps {
   borderColor?: string;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({
+export const KPICard: React.FC<KPICardProps> = React.memo(({
   title,
   value,
   sub,
@@ -75,4 +75,6 @@ export const KPICard: React.FC<KPICardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+KPICard.displayName = 'KPICard';

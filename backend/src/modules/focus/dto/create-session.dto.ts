@@ -25,3 +25,23 @@ export class UpdateGoalDto {
   @Max(1440)
   dailyGoalMinutes: number;
 }
+
+export class UpdateSessionDto {
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @IsOptional()
+  @IsString()
+  time?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(480)
+  duration?: number;
+
+  @IsOptional()
+  @IsString()
+  tag?: string;
+}

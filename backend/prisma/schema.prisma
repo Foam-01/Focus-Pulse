@@ -27,6 +27,10 @@ model FocusSession {
   duration  Int
   tag       String?  @default("โฟกัสทั่วไป")
   createdAt DateTime @default(now())
+
+  @@index([date, createdAt])
+  @@index([createdAt])
+  @@index([userId])
 }
 
 model VideoItem {
@@ -40,6 +44,8 @@ model VideoItem {
   description String
   isPrimary   Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  @@index([isPrimary, createdAt])
 }
 
 model UserSettings {

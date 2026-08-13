@@ -66,6 +66,30 @@ export class FocusService {
     };
   }
 
+  async updateSession(id: string, dto: any): Promise<FocusSessionRecord | null> {
+    try {
+      const updated = await this.prisma.focusSession.update({
+        where: { id },
+        data: {
+          ...(dto.date && { date: dto.date }),
+          ...(dto.time && { time: dto.time }),
+          ...(dto.duration !== undefined && { duration: Number(dto.duration) }),
+          ...(dto.tag && { tag: dto.tag }),
+        },
+      });
+      return {
+        id: updated.id,
+        date: updated.date,
+        time: updated.time,
+        duration: updated.duration,
+        tag: updated.tag || 'โฟกัสทั่วไป',
+        createdAt: updated.createdAt.toISOString(),
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async deleteSession(id: string): Promise<boolean> {
     try {
       await this.prisma.focusSession.delete({
