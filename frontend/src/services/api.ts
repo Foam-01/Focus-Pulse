@@ -122,6 +122,7 @@ export const ApiService = {
   },
 
   async updateDailyGoal(dailyGoalMinutes: number): Promise<number> {
+    localStorage.setItem('focus_daily_goal', String(dailyGoalMinutes));
     try {
       const res = await fetch(`${API_BASE}/focus/goal`, {
         method: 'POST',
@@ -133,7 +134,6 @@ export const ApiService = {
         return data.dailyGoalMinutes;
       }
     } catch (e) {}
-    localStorage.setItem('focus_daily_goal', String(dailyGoalMinutes));
     return dailyGoalMinutes;
   },
 

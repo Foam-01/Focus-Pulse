@@ -20,9 +20,20 @@ export const DashboardView: React.FC = () => {
     fetchAnalytics();
   }, [timeframe]);
 
-  const handleUpdateGoal = async (newGoal: number) => {
-    await ApiService.updateDailyGoal(newGoal);
-    fetchAnalytics();
+  const handleUpdateGoal = (newGoal: number) => {
+    // Optimistic UI Update: Change screen numbers instantly (0ms response)
+    setSummary((prev) => {
+      if (!prev) return null;
+      const goalProgressPercent = Math.min(100, Math.round((prev.todayMinutes / newGoal) * 100));
+      return {
+        ...prev,
+        dailyGoalMinutes: newGoal,
+        goalProgressPercent,
+      };
+    });
+
+    // Background sync to DB without blocking the user interface
+    ApiService.updateDailyGoal(newGoal).catch((err) => console.error(err));
   };
 
   if (!summary) {
