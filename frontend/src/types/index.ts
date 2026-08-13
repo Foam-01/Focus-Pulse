@@ -52,4 +52,20 @@ export interface LapRecord {
   totalTimeMs: number;
 }
 
-export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'alarmView' | 'stopwatchView' | 'videoLibraryView';
+export interface CityClockItem {
+  id: string;
+  cityName: string;
+  countryName: string;
+  timezone: string; // IANA Timezone string e.g. 'Asia/Bangkok'
+  flagEmoji?: string;
+  isLocal?: boolean;
+}
+
+export type ActiveView =
+  | 'dashboardView'
+  | 'timerView'
+  | 'multiTimerView'
+  | 'alarmView'
+  | 'stopwatchView'
+  | 'worldClockView'
+  | 'videoLibraryView';

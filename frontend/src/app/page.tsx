@@ -31,6 +31,11 @@ const StopwatchView = dynamic(
   { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดจับเวลาเดินหน้า...</div> }
 );
 
+const WorldClockView = dynamic(
+  () => import('../components/worldclock/WorldClockView').then((mod) => mod.WorldClockView),
+  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดเวลาโลก...</div> }
+);
+
 const HistoryModal = dynamic(
   () => import('../components/history/HistoryModal').then((mod) => mod.HistoryModal)
 );
@@ -133,6 +138,7 @@ export default function HomePage() {
         {activeView === 'multiTimerView' && <MultiTimerView />}
         {activeView === 'alarmView' && <AlarmView />}
         {activeView === 'stopwatchView' && <StopwatchView />}
+        {activeView === 'worldClockView' && <WorldClockView />}
         {activeView === 'videoLibraryView' && <VideoLibraryView />}
       </main>
 
