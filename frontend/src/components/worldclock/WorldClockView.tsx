@@ -45,6 +45,26 @@ const DEFAULT_5_CITIES: CityClockItem[] = [
   },
 ];
 
+const CITY_MAP_COORDINATES: Record<string, { top: string; left: string }> = {
+  'Asia/Bangkok': { top: '44%', left: '73%' },
+  'Asia/Tokyo': { top: '34%', left: '86%' },
+  'Europe/London': { top: '24%', left: '48%' },
+  'America/New_York': { top: '30%', left: '26%' },
+  'Australia/Sydney': { top: '72%', left: '84%' },
+  'Europe/Paris': { top: '26%', left: '49%' },
+  'Asia/Seoul': { top: '35%', left: '83%' },
+  'Asia/Singapore': { top: '50%', left: '74%' },
+  'Asia/Dubai': { top: '38%', left: '62%' },
+  'America/Los_Angeles': { top: '32%', left: '16%' },
+  'Europe/Berlin': { top: '23%', left: '51%' },
+  'Asia/Shanghai': { top: '35%', left: '79%' },
+  'Europe/Rome': { top: '27%', left: '51%' },
+  'Asia/Kolkata': { top: '40%', left: '68%' },
+  'America/Toronto': { top: '28%', left: '26%' },
+  'Europe/Moscow': { top: '20%', left: '58%' },
+  'Asia/Hong_Kong': { top: '41%', left: '78%' },
+};
+
 export const WorldClockView: React.FC = () => {
   const [cities, setCities] = useState<CityClockItem[]>([]);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -110,13 +130,13 @@ export const WorldClockView: React.FC = () => {
         </button>
       </div>
 
-      {/* World Map Header Box (Theme-Adaptive Light & Dark Mode) */}
+      {/* World Map Header Box (Large Spacious Map Display) */}
       <div
         className="glass-card"
         style={{
           position: 'relative',
           width: '100%',
-          height: '320px',
+          height: '420px',
           borderRadius: '24px',
           overflow: 'hidden',
           background: 'var(--bg-card)',
@@ -152,63 +172,59 @@ export const WorldClockView: React.FC = () => {
           }}
         />
 
-        {/* City Location Map Pins */}
+        {/* Dynamic City Location Map Pins */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'auto' }}>
-          {/* 1. Bangkok, Thailand (73%, 44%) */}
-          <div style={{ position: 'absolute', top: '44%', left: '73%', transform: 'translate(-50%, -50%)' }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--blue-sky)', border: '2px solid #ffffff', boxShadow: '0 0 12px var(--blue-sky)' }} />
-              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-main)', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', padding: '0.2rem 0.6rem', borderRadius: '10px', boxShadow: 'var(--shadow-sm)', marginTop: '4px', whiteSpace: 'nowrap' }}>
-                🇹🇭 กรุงเทพฯ
-              </span>
-            </div>
-          </div>
-
-          {/* 2. Tokyo, Japan (86%, 34%) */}
-          <div style={{ position: 'absolute', top: '34%', left: '86%', transform: 'translate(-50%, -50%)' }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-main)', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', padding: '0.15rem 0.5rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
-                🇯🇵 โตเกียว
-              </span>
-            </div>
-          </div>
-
-          {/* 3. London, UK (48%, 24%) */}
-          <div style={{ position: 'absolute', top: '24%', left: '48%', transform: 'translate(-50%, -50%)' }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-main)', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', padding: '0.15rem 0.5rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
-                🇬🇧 ลอนดอน
-              </span>
-            </div>
-          </div>
-
-          {/* 4. New York, USA (26%, 30%) */}
-          <div style={{ position: 'absolute', top: '30%', left: '26%', transform: 'translate(-50%, -50%)' }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-main)', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', padding: '0.15rem 0.5rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
-                🇺🇸 นิวยอร์ก
-              </span>
-            </div>
-          </div>
-
-          {/* 5. Sydney, Australia (84%, 72%) */}
-          <div style={{ position: 'absolute', top: '72%', left: '84%', transform: 'translate(-50%, -50%)' }}>
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
-              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-main)', background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', padding: '0.15rem 0.5rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
-                🇦🇺 ซิดนีย์
-              </span>
-            </div>
-          </div>
+          {cities.map((city) => {
+            const coords = CITY_MAP_COORDINATES[city.timezone] || { top: '50%', left: '50%' };
+            return (
+              <div
+                key={city.id}
+                style={{
+                  position: 'absolute',
+                  top: coords.top,
+                  left: coords.left,
+                  transform: 'translate(-50%, -50%)',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      width: city.isLocal ? '14px' : '12px',
+                      height: city.isLocal ? '14px' : '12px',
+                      borderRadius: '50%',
+                      background: city.isLocal ? 'var(--blue-sky)' : '#60a5fa',
+                      border: '2px solid #ffffff',
+                      boxShadow: city.isLocal ? '0 0 14px var(--blue-sky)' : '0 0 10px #60a5fa',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: 'var(--text-main)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border-card)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '10px',
+                      boxShadow: 'var(--shadow-sm)',
+                      marginTop: '4px',
+                      whiteSpace: 'nowrap',
+                      backdropFilter: 'blur(8px)',
+                    }}
+                  >
+                    {city.flagEmoji} {city.cityName}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Sleek Top-Left Badge */}
         <div style={{ position: 'absolute', top: '1.2rem', left: '1.4rem', zIndex: 4 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', background: 'var(--bg-subtle)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-card)', padding: '0.4rem 0.9rem', borderRadius: '14px', fontWeight: 700, fontSize: '0.82rem' }}>
-            <Globe size={15} style={{ color: 'var(--blue-sky)' }} /> แผนที่โซนเวลาโลก (World Clock Map)
+            <Globe size={15} style={{ color: 'var(--blue-sky)' }} /> แผนที่โซนเวลาโลก 
           </div>
         </div>
       </div>
