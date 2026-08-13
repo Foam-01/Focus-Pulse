@@ -130,48 +130,144 @@ export const WorldClockView: React.FC = () => {
         </button>
       </div>
 
-      {/* World Map Vector Illustration Header Card */}
+      {/* World Map Header Box (Styled after Windows Clock App) */}
       <div
         className="glass-card"
         style={{
           position: 'relative',
           width: '100%',
-          height: '200px',
+          height: '320px',
           borderRadius: '24px',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(9, 13, 22, 0.98))',
+          background: 'linear-gradient(135deg, #0b1329 0%, #090d16 100%)',
           border: '1px solid var(--border-card)',
           marginBottom: '1.8rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          boxShadow: 'var(--shadow-md)',
         }}
       >
-        {/* World Map SVG Vector */}
-        <svg viewBox="0 0 1000 500" style={{ width: '100%', height: '100%', opacity: 0.25, objectFit: 'cover' }}>
+        {/* Real-time Solar Day/Night Shadow Mask Overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(ellipse at 70% 50%, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.65) 75%)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+
+        {/* Realistic World Continents SVG Path Illustration */}
+        <svg
+          viewBox="0 0 1000 500"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            opacity: 0.6,
+          }}
+        >
+          {/* North America & Greenland */}
           <path
-            fill="var(--text-main)"
-            d="M150,150 Q200,100 250,150 T350,150 T450,150 T550,150 T650,150 T750,150 T850,150 M100,250 Q200,200 300,250 T500,250 T700,250 T900,250 M200,350 Q300,300 400,350 T600,350 T800,350"
-            stroke="var(--blue-sky)"
-            strokeWidth="3"
-            strokeDasharray="5,5"
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 120 80 Q 180 50 280 70 T 320 140 T 260 210 T 180 260 T 140 180 Z M 340 40 Q 380 30 420 50 T 390 100 T 350 70 Z"
           />
-          {/* Map Pins */}
-          <circle cx="780" cy="240" r="8" fill="#3b82f6" /> {/* Bangkok */}
-          <circle cx="850" cy="200" r="8" fill="#60a5fa" /> {/* Tokyo */}
-          <circle cx="480" cy="180" r="8" fill="#60a5fa" /> {/* London */}
-          <circle cx="280" cy="210" r="8" fill="#60a5fa" /> {/* NYC */}
-          <circle cx="880" cy="360" r="8" fill="#60a5fa" /> {/* Sydney */}
+          {/* South America */}
+          <path
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 280 270 Q 340 280 370 340 T 320 440 T 270 380 T 260 300 Z"
+          />
+          {/* Europe */}
+          <path
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 460 90 Q 520 80 560 110 T 540 170 T 480 160 T 460 120 Z"
+          />
+          {/* Africa */}
+          <path
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 470 180 Q 560 170 580 250 T 540 370 T 480 340 T 460 230 Z"
+          />
+          {/* Asia & Middle East */}
+          <path
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 570 90 Q 720 70 850 110 T 880 220 T 780 280 T 640 220 T 560 150 Z"
+          />
+          {/* Australia & Oceania */}
+          <path
+            fill="var(--navy-muted)"
+            opacity="0.4"
+            d="M 800 320 Q 890 310 910 370 T 850 430 T 790 390 Z"
+          />
+
+          {/* Grid Latitude/Longitude Lines */}
+          <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
+          <line x1="500" y1="0" x2="500" y2="500" stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
         </svg>
 
-        {/* Ambient Map Text Overlay */}
-        <div style={{ position: 'absolute', textAlign: 'center', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', background: 'var(--blue-light)', padding: '0.4rem 1rem', borderRadius: '20px', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.4rem' }}>
-            <Globe size={16} /> แผนที่โซนเวลาโลก (World Timezones Map)
+        {/* City Location Map Pins */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'auto' }}>
+          {/* 1. Bangkok, Thailand (71%, 46%) */}
+          <div style={{ position: 'absolute', top: '46%', left: '71%', transform: 'translate(-50%, -50%)' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#3b82f6', border: '2px solid #ffffff', boxShadow: '0 0 12px #3b82f6' }} />
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#ffffff', background: 'rgba(15, 23, 42, 0.85)', padding: '0.15rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                🇹🇭 กรุงเทพฯ
+              </span>
+            </div>
           </div>
-          <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            เปรียบเทียบเวลาจริง 5 เมืองสำคัญทั่วโลก
-          </span>
+
+          {/* 2. Tokyo, Japan (83%, 35%) */}
+          <div style={{ position: 'absolute', top: '35%', left: '83%', transform: 'translate(-50%, -50%)' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)', background: 'rgba(15, 23, 42, 0.8)', padding: '0.15rem 0.45rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                🇯🇵 โตเกียว
+              </span>
+            </div>
+          </div>
+
+          {/* 3. London, UK (49%, 28%) */}
+          <div style={{ position: 'absolute', top: '28%', left: '49%', transform: 'translate(-50%, -50%)' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)', background: 'rgba(15, 23, 42, 0.8)', padding: '0.15rem 0.45rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                🇬🇧 ลอนดอน
+              </span>
+            </div>
+          </div>
+
+          {/* 4. New York, USA (28%, 34%) */}
+          <div style={{ position: 'absolute', top: '34%', left: '28%', transform: 'translate(-50%, -50%)' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)', background: 'rgba(15, 23, 42, 0.8)', padding: '0.15rem 0.45rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                🇺🇸 นิวยอร์ก
+              </span>
+            </div>
+          </div>
+
+          {/* 5. Sydney, Australia (85%, 74%) */}
+          <div style={{ position: 'absolute', top: '74%', left: '85%', transform: 'translate(-50%, -50%)' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa', border: '2px solid #ffffff', boxShadow: '0 0 10px #60a5fa' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)', background: 'rgba(15, 23, 42, 0.8)', padding: '0.15rem 0.45rem', borderRadius: '8px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                🇦🇺 ซิดนีย์
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Sleek Top-Left Badge */}
+        <div style={{ position: 'absolute', top: '1.2rem', left: '1.4rem', zIndex: 4 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#ffffff', background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-card)', padding: '0.4rem 0.9rem', borderRadius: '14px', fontWeight: 700, fontSize: '0.82rem' }}>
+            <Globe size={15} style={{ color: 'var(--blue-sky)' }} /> แผนที่โซนเวลาโลก (World Clock Map)
+          </div>
         </div>
       </div>
 
