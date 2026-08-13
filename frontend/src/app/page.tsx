@@ -16,6 +16,11 @@ const VideoLibraryView = dynamic(
   { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดคลังวิดีโอ...</div> }
 );
 
+const MultiTimerView = dynamic(
+  () => import('../components/timer/MultiTimerView').then((mod) => mod.MultiTimerView),
+  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดตัวจับเวลา...</div> }
+);
+
 const HistoryModal = dynamic(
   () => import('../components/history/HistoryModal').then((mod) => mod.HistoryModal)
 );
@@ -115,6 +120,7 @@ export default function HomePage() {
         {/* Dynamic Section Views */}
         {activeView === 'dashboardView' && <DashboardView />}
         {activeView === 'timerView' && <TimerView />}
+        {activeView === 'multiTimerView' && <MultiTimerView />}
         {activeView === 'videoLibraryView' && <VideoLibraryView />}
       </main>
 

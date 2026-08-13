@@ -28,4 +28,10 @@ export interface VideoItem {
   isPrimary?: boolean;
 }
 
-export type ActiveView = 'dashboardView' | 'timerView' | 'videoLibraryView';
+export interface MultiTimerPreset {
+  id: string;
+  title: string;
+  totalSeconds: number;
+}
+
+export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'videoLibraryView';

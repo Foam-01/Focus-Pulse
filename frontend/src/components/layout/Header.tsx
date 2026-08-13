@@ -24,6 +24,10 @@ const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
     title: 'จับเวลาโฟกัส',
     sub: 'จับเวลาทำงาน 25 นาที แบบ Pomodoro',
   },
+  multiTimerView: {
+    title: 'จับเวลาหลายเรือน',
+    sub: 'สร้างและควบคุมนาฬิกาจับเวลานับถอยหลังหลายเรือนพร้อมกัน',
+  },
   videoLibraryView: {
     title: 'วิดีโอพักสายตา',
     sub: 'วิดีโอผ่อนคลายสำหรับเล่นเมื่อหมดเวลาโฟกัส',
