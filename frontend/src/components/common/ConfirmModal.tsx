@@ -27,20 +27,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(12px)',
-        padding: '1rem',
-      }}
-      onClick={onCancel}
-    >
+    <div className="modal-overlay" onClick={onCancel}>
       <div
         className="glass-card"
         onClick={(e) => e.stopPropagation()}

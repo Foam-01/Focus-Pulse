@@ -332,7 +332,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             maxWidth: '460px',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-card)',
-            borderRadius: '28px',
+            borderRadius: '24px',
             padding: '2.5rem 2.2rem',
             boxShadow: 'var(--shadow-lg)',
             backdropFilter: 'blur(24px)',

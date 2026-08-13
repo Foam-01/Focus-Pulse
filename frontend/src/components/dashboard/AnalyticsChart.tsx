@@ -89,7 +89,7 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = React.memo(({
       style={{
         marginTop: '1.8rem',
         padding: '2.2rem 2.4rem',
-        borderRadius: '28px',
+        borderRadius: '24px',
         border: '1px solid var(--border-card)',
         background: 'var(--bg-card)',
         boxShadow: 'var(--shadow-md)',

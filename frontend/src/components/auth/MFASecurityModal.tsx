@@ -96,19 +96,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(12px)',
-        padding: '1rem',
-      }}
-    >
+    <div className="modal-overlay" onClick={onClose}>
       <div
         className="glass-card"
         style={{

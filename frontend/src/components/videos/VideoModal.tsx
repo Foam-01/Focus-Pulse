@@ -27,25 +27,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
   };
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(5, 10, 25, 0.75)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '1.5rem',
-      }}
-    >
+    <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content-box"
         onClick={(e) => e.stopPropagation()}
