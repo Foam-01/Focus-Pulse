@@ -137,70 +137,20 @@ export const WorldClockView: React.FC = () => {
           }}
         />
 
-        {/* Realistic World Continents SVG Path Illustration */}
-        <svg
-          viewBox="0 0 1000 500"
+        {/* High-Definition Generated World Map Image Asset */}
+        <img
+          src="/images/world_map_vector.png"
+          alt="World Map Graphic"
           style={{
             position: 'absolute',
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
+            objectFit: 'cover',
+            opacity: 0.8,
+            transition: 'opacity 0.3s ease',
           }}
-        >
-          {/* Grid Latitude/Longitude Lines */}
-          <line x1="0" y1="250" x2="1000" y2="250" stroke="var(--border-card)" strokeDasharray="4 4" opacity="0.6" />
-          <line x1="500" y1="0" x2="500" y2="500" stroke="var(--border-card)" strokeDasharray="4 4" opacity="0.6" />
-
-          {/* North America & Greenland */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 120 70 L 160 50 L 220 55 L 290 60 L 320 110 L 290 140 L 250 190 L 210 240 L 170 210 L 140 160 L 100 120 Z M 330 35 L 390 25 L 430 45 L 380 90 L 340 60 Z"
-          />
-          {/* South America */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 270 250 L 320 260 L 370 300 L 350 360 L 310 440 L 280 410 L 260 330 L 250 280 Z"
-          />
-          {/* Europe */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 460 70 L 510 65 L 560 90 L 540 150 L 490 160 L 450 120 Z"
-          />
-          {/* Africa */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 460 170 L 540 160 L 580 230 L 550 340 T 490 370 L 460 300 L 440 210 Z"
-          />
-          {/* Asia */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 570 70 L 750 50 L 870 90 L 890 180 L 810 240 L 760 270 L 680 240 L 620 210 L 560 140 Z"
-          />
-          {/* Australia & Oceania */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.25"
-            d="M 790 310 L 890 300 L 910 370 L 850 430 L 770 390 Z"
-          />
-          {/* Japan */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.35"
-            d="M 870 160 L 880 150 L 890 180 L 875 200 Z"
-          />
-          {/* UK & Ireland */}
-          <path
-            fill="var(--text-muted)"
-            opacity="0.35"
-            d="M 460 100 L 470 90 L 475 110 L 465 120 Z"
-          />
-        </svg>
+        />
 
         {/* City Location Map Pins */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'auto' }}>
