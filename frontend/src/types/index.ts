@@ -34,4 +34,15 @@ export interface MultiTimerPreset {
   totalSeconds: number;
 }
 
-export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'videoLibraryView';
+export interface AlarmItem {
+  id: string;
+  hour: number; // 0 - 23
+  minute: number; // 0 - 59
+  label: string;
+  isEnabled: boolean;
+  repeatDays: number[]; // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
+  sound?: string;
+  snoozeMinutes?: number;
+}
+
+export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'alarmView' | 'videoLibraryView';
