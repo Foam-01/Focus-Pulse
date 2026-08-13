@@ -45,4 +45,11 @@ export interface AlarmItem {
   snoozeMinutes?: number;
 }
 
-export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'alarmView' | 'videoLibraryView';
+export interface LapRecord {
+  id: string;
+  lapNumber: number;
+  lapTimeMs: number;
+  totalTimeMs: number;
+}
+
+export type ActiveView = 'dashboardView' | 'timerView' | 'multiTimerView' | 'alarmView' | 'stopwatchView' | 'videoLibraryView';
