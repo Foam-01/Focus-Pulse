@@ -10,19 +10,24 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { FocusService, FocusSessionRecord } from './focus.service';
 import { CreateSessionDto, UpdateGoalDto, UpdateSessionDto } from './dto/create-session.dto';
 
+@ApiTags('Focus Sessions')
+@ApiSecurity('x-user-id')
 @Controller('focus')
 export class FocusController {
   constructor(private readonly focusService: FocusService) {}
 
   @Get('history')
+  @ApiOperation({ summary: 'Get user focus history records' })
   async getHistory(@Headers('x-user-id') userId?: string): Promise<FocusSessionRecord[]> {
     return await this.focusService.getHistory(userId);
   }
 
   @Post('history')
+  @ApiOperation({ summary: 'Create new focus session record' })
   async createSession(
     @Headers('x-user-id') userId: string,
     @Body() dto: CreateSessionDto,

@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
@@ -18,11 +19,13 @@ import { VideosService, VideoItem } from './videos.service';
 
 const uploadDir = path.join(process.cwd(), '..', 'frontend', 'public', 'Vdo');
 
+@ApiTags('Video Library')
 @Controller('videos')
 export class VideosController {
   constructor(private readonly videosService: VideosService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get ambient video library list' })
   async getAllVideos(): Promise<VideoItem[]> {
     return await this.videosService.getAllVideos();
   }
