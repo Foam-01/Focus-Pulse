@@ -49,7 +49,7 @@ export const DashboardView: React.FC = () => {
         <KPICard
           title="เวลาโฟกัสวันนี้"
           value={`${summary.todayMinutes} นาที`}
-          sub={`ประมาณ ${hoursToday} ชั่วโมง`}
+          sub={`รวม ${hoursToday} ชั่วโมง`}
           accentColor="#60a5fa"
           bgTint="rgba(59, 130, 246, 0.08)"
           borderColor="rgba(59, 130, 246, 0.25)"

@@ -13,7 +13,7 @@ export const TimerView: React.FC = () => {
   const [focusMinutesInput, setFocusMinutesInput] = useState<string>('25');
   const [remainingSeconds, setRemainingSeconds] = useState<number>(25 * 60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [sessionStatus, setSessionStatus] = useState<string>('พร้อมเริ่มต้นโฟกัส');
+  const [sessionStatus, setSessionStatus] = useState<string>('พร้อมเริ่มโฟกัส');
   const [selectedTag, setSelectedTag] = useState<string>('งานทั่วไป');
 
   // Analytics & History state
@@ -190,7 +190,7 @@ export const TimerView: React.FC = () => {
     setFocusMinutes(mins);
     setFocusMinutesInput(String(mins));
     setRemainingSeconds(mins * 60);
-    setSessionStatus('พร้อมเริ่มต้นโฟกัส');
+    setSessionStatus('พร้อมเริ่มโฟกัส');
   };
 
   const adjustMinutes = (delta: number) => {
@@ -199,7 +199,7 @@ export const TimerView: React.FC = () => {
     setFocusMinutes(newMins);
     setFocusMinutesInput(String(newMins));
     setRemainingSeconds(newMins * 60);
-    setSessionStatus('พร้อมเริ่มต้นโฟกัส');
+    setSessionStatus('พร้อมเริ่มโฟกัส');
   };
 
   // Handle direct custom typing into the minute display box
@@ -215,7 +215,7 @@ export const TimerView: React.FC = () => {
       if (!isNaN(val) && val >= 1 && val <= 480) {
         setFocusMinutes(val);
         setRemainingSeconds(val * 60);
-        setSessionStatus('พร้อมเริ่มต้นโฟกัส');
+        setSessionStatus('พร้อมเริ่มโฟกัส');
       }
     }
   };
@@ -232,23 +232,23 @@ export const TimerView: React.FC = () => {
     setFocusMinutes(val);
     setFocusMinutesInput(String(val));
     setRemainingSeconds(val * 60);
-    setSessionStatus('พร้อมเริ่มต้นโฟกัส');
+    setSessionStatus('พร้อมเริ่มโฟกัส');
   };
 
   const toggleTimer = () => {
     if (isRunning) {
       setIsRunning(false);
-      setSessionStatus('พักการจับเวลา');
+      setSessionStatus('หยุดพักชั่วคราว');
     } else {
       setIsRunning(true);
-      setSessionStatus('กำลังจับเวลาโฟกัส');
+      setSessionStatus('กำลังโฟกัส...');
     }
   };
 
   const resetTimer = () => {
     setIsRunning(false);
     setRemainingSeconds(focusMinutes * 60);
-    setSessionStatus('พร้อมเริ่มต้นโฟกัส');
+    setSessionStatus('พร้อมเริ่มโฟกัส');
   };
 
   const testQuickFinish = () => {
@@ -622,7 +622,7 @@ export const TimerView: React.FC = () => {
                 onClick={handleOpenAddHistory}
                 style={{ padding: '0.4rem 0.85rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                <Plus size={15} /> เพิ่มบันทึก
+                <Plus size={15} /> เพิ่มประวัติ
               </button>
               <span style={{ fontSize: '0.82rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.4rem 0.75rem', borderRadius: '10px', fontWeight: 700 }}>
                 {recentHistory.length} รอบล่าสุด
@@ -632,7 +632,7 @@ export const TimerView: React.FC = () => {
 
           {recentHistory.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '1.6rem', color: 'var(--text-muted)', fontSize: '0.9rem', background: 'var(--bg-subtle)', borderRadius: '14px' }}>
-              ยังไม่มีรายการโฟกัสในวันนี้ เริ่มกดจับเวลาเพื่อสั่งสมความสำเร็จได้เลย!
+              ยังไม่มีประวัติการโฟกัสในวันนี้
             </div>
           ) : (
             <div className="table-wrapper">

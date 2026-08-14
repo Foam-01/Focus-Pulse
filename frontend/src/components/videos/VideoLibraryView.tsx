@@ -162,13 +162,13 @@ export const VideoLibraryView: React.FC = () => {
       >
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> วิดีโอสำหรับช่วงพัก
+            <Sparkles size={14} /> คลังวิดีโอพักสายตา
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
             คลังวิดีโอผ่อนคลาย
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            วิดีโอหลักจะเล่นให้อัตโนมัติเมื่อหมดเวลาโฟกัส
+            เล่นวิดีโอหลักให้อัตโนมัติเมื่อหมดเวลาโฟกัส
           </p>
         </div>
 
@@ -293,9 +293,9 @@ export const VideoLibraryView: React.FC = () => {
                     gap: '0.3rem',
                     transition: 'all 0.2s ease',
                   }}
-                  title="ตั้งวิดีโอนี้เป็นวิดีโอหลักอันดับ 1"
+                  title="เลือกวิดีโอนี้เป็นวิดีโอหลัก"
                 >
-                  <Star size={13} /> ตั้งเป็นวิดีโอหลัก
+                  <Star size={13} /> เลือกเป็นวิดีโอหลัก
                 </button>
               )}
 

@@ -203,13 +203,13 @@ export const AlarmView: React.FC = () => {
       >
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> แจ้งเตือนเวลาจริง
+            <Sparkles size={14} /> ระบบแจ้งเตือน
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
             นาฬิกาปลุก
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            ตั้งเวลาปลุกตามเวลาจริงของเครื่องพร้อมตัวเลือกวันปลุกซ้ำ
+            ตั้งเวลาปลุกและกำหนดวันแจ้งเตือนซ้ำ
           </p>
         </div>
 

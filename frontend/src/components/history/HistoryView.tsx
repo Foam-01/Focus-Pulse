@@ -177,10 +177,10 @@ export const HistoryView: React.FC = () => {
             <Sparkles size={14} /> ประวัติการโฟกัสย้อนหลัง
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-            ประวัติการโฟกัสทั้งหมด ({historyList.length} รายการ)
+            ประวัติการโฟกัส ({historyList.length} รายการ)
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500, margin: '0.2rem 0 0 0' }}>
-            บันทึกและติดตามความต่อเนื่องของการทำงาน สามารถค้นหา เพิ่ม หรือจัดการประวัติได้ตามต้องการ
+            ตรวจสอบ ค้นหา และจัดการประวัติการโฟกัสย้อนหลัง
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export const HistoryView: React.FC = () => {
             }}
           >
             <Plus size={18} />
-            <span>เพิ่มบันทึกโฟกัส</span>
+            <span>เพิ่มประวัติ</span>
           </button>
 
           {historyList.length > 0 && (
@@ -231,7 +231,7 @@ export const HistoryView: React.FC = () => {
               }}
             >
               <Trash2 size={16} />
-              <span>ล้างประวัติทั้งหมด</span>
+              <span>ลบประวัติทั้งหมด</span>
             </button>
           )}
         </div>
@@ -845,8 +845,8 @@ export const HistoryView: React.FC = () => {
         isOpen={deletingId !== null}
         onCancel={() => setDeletingId(null)}
         onConfirm={handleConfirmDelete}
-        title="ยืนยันการลบประวัติ"
-        message="คุณต้องการลบประวัติการโฟกัสรายการนี้ใช่หรือไม่? เมื่อลบแล้วจะไม่สามารถกู้คืนได้"
+        title="ยืนยันการลบรายการ"
+        message="คุณต้องการลบรายการนี้ใช่หรือไม่? ข้อมูลจะถูกลบถาวร"
         confirmText="ลบรายการ"
         cancelText="ยกเลิก"
         isDanger={true}
@@ -857,9 +857,9 @@ export const HistoryView: React.FC = () => {
         isOpen={showClearAllConfirm}
         onCancel={() => setShowClearAllConfirm(false)}
         onConfirm={handleConfirmClearAll}
-        title="ยืนยันล้างประวัติทั้งหมด"
-        message="คุณต้องการลบประวัติการโฟกัสย้อนหลังทั้งหมดใช่หรือไม่? ข้อมูลประวัติทั้งหมดจะถูกลบถาวร"
-        confirmText="ล้างประวัติทั้งหมด"
+        title="ยืนยันลบประวัติทั้งหมด"
+        message="คุณต้องการลบประวัติทั้งหมดใช่หรือไม่? ข้อมูลจะถูกลบถาวร"
+        confirmText="ลบประวัติทั้งหมด"
         cancelText="ยกเลิก"
         isDanger={true}
       />

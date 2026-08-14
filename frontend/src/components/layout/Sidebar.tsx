@@ -20,7 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems: { id: ActiveView; title: string; icon: React.ReactNode }[] = [
     {
       id: 'dashboardView',
-      title: 'สรุปผลงาน',
+      title: 'แดชบอร์ด',
       icon: <LayoutDashboard size={20} />,
     },
     {
@@ -30,12 +30,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'historyView',
-      title: 'ประวัติโฟกัสทั้งหมด',
+      title: 'ประวัติการโฟกัส',
       icon: <History size={20} />,
     },
     {
       id: 'multiTimerView',
-      title: 'จับเวลาหลายเรือน',
+      title: 'นาฬิกาหลายเรือน',
       icon: <Clock size={20} />,
     },
     {
@@ -45,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'stopwatchView',
-      title: 'จับเวลาเดินหน้า',
+      title: 'นาฬิกาจับเวลา',
       icon: <Watch size={20} />,
     },
     {

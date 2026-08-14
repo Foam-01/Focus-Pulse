@@ -37,7 +37,7 @@ export const GoalStepper: React.FC<GoalStepperProps> = ({ dailyGoalMinutes, onUp
               ตั้งเป้าหมายเวลาโฟกัส
             </h3>
             <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              กำหนดเวลาทำงานที่คุณต้องการทำในแต่ละวัน
+              ตั้งเป้าหมายเวลาทำงานต่อวัน
             </p>
           </div>
         </div>

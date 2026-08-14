@@ -94,13 +94,13 @@ export const StopwatchView: React.FC = () => {
       >
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> จับเวลาแม่นยำระดับมิลลิวินาที
+            <Sparkles size={14} /> นาฬิกาจับเวลา
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            จับเวลาเดินหน้า
+            นาฬิกาจับเวลา
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            จับเวลาเดินหน้าขึ้นอย่างแม่นยำพร้อมระบบบันทึกเวลาต่อรอบ (Lap Time)
+            จับเวลาเดินหน้าและบันทึกเวลาต่อรอบ
           </p>
         </div>
       </div>

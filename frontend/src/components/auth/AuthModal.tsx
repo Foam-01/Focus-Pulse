@@ -199,13 +199,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         {/* Modal Title */}
         <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 800, marginBottom: '0.3rem' }}>
-            <ShieldCheck size={16} /> ความปลอดภัยระดับสูง
+            <ShieldCheck size={16} /> ความปลอดภัยบัญชี
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)' }}>
             {mode === 'login' ? 'เข้าสู่ระบบ Focus Pulse' : 'สมัครสมาชิกใหม่'}
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem', fontWeight: 600 }}>
-            {mode === 'login' ? 'กรอกข้อมูลเพื่อซิงค์ประวัติเวลาโฟกัสของคุณ' : 'สร้างบัญชีเพื่อปกป้องและจัดเก็บข้อมูลส่วนตัวของคุณ'}
+            {mode === 'login' ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ' : 'สร้างบัญชีใหม่เพื่อเริ่มบันทึกข้อมูล'}
           </p>
         </div>
 

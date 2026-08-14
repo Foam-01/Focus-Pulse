@@ -98,13 +98,13 @@ export const MultiTimerView: React.FC = () => {
       >
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> นาฬิกาจับเวลาเฉพาะกิจ
+            <Sparkles size={14} /> ตัวจับเวลานับถอยหลัง
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            จับเวลาหลายเรือน
+            นาฬิกาหลายเรือน
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            ควบคุมนาฬิกานับถอยหลังหลายเรือนแยกกันอย่างอิสระ
+            จัดการตัวนับถอยหลังหลายรายการพร้อมกัน
           </p>
         </div>
 
@@ -154,10 +154,10 @@ export const MultiTimerView: React.FC = () => {
             <Clock size={28} />
           </div>
           <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-            ยังไม่มีการ์ดตัวจับเวลา
+            ยังไม่มีรายการตัวจับเวลา
           </h3>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            กดปุ่มด้านล่างเพื่อเพิ่มการ์ดจับเวลานับถอยหลังเรือนแรกของคุณ
+            กดปุ่มเพิ่มตัวจับเวลาเพื่อเริ่มต้นใช้งาน
           </p>
           <button
             className="btn-primary-gradient"

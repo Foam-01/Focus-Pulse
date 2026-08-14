@@ -138,7 +138,7 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = React.memo(({
             สถิตีย้อนหลัง
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-            กราฟแสดงเวลาโฟกัส
+            สถิติเวลาโฟกัส
           </h2>
           <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.2rem', margin: 0, fontWeight: 500 }}>
             แสดงเวลาทำงานย้อนหลังตามช่วงเวลาที่เลือก
@@ -158,7 +158,7 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = React.memo(({
           }}
         >
           {[
-            { id: 'day', title: '7 วันล่าสุด' },
+            { id: 'day', title: '7 วัน' },
             { id: 'week', title: '4 สัปดาห์' },
             { id: 'month', title: '6 เดือน' },
           ].map((tf) => {
@@ -228,9 +228,9 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = React.memo(({
             padding: '0.9rem 1.1rem',
           }}
         >
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '0.2rem' }}>ทำได้มากที่สุด</span>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '0.2rem' }}>สูงสุด</span>
           <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 800 }}>
-            {peakItem.label} <span style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 600 }}>({formatNum(peakItem.value)} น.)</span>
+            {peakItem.label} <span style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 600 }}>({formatNum(peakItem.value)} นาที)</span>
           </strong>
         </div>
       </div>
