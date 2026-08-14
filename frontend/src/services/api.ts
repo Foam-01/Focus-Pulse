@@ -199,7 +199,16 @@ export const ApiService = {
 
     if (list.length === 0) {
       const localVdosStr = localStorage.getItem('custom_videos_list');
-      const customList: VideoItem[] = localVdosStr ? JSON.parse(localVdosStr) : [];
+      let customList: VideoItem[] = localVdosStr ? JSON.parse(localVdosStr) : [];
+
+      // Auto-repair any expired blob: URLs to fallback reliable video
+      customList = customList.map((v) => {
+        if (v.src && v.src.startsWith('blob:')) {
+          return { ...v, src: '/Vdo/ch.mp4' };
+        }
+        return v;
+      });
+
       const defaultList: VideoItem[] = [
         {
           id: 'vdo_ch',
@@ -274,8 +283,19 @@ export const ApiService = {
       console.warn('Backend upload failed, creating object URL fallback.');
     }
 
-    // Fallback using Object URL
-    const fileUrl = URL.createObjectURL(file);
+    // Fallback using FileReader Data URL (permanent, does not expire on reload)
+    let fileUrl = '';
+    try {
+      fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+    } catch (e) {
+      fileUrl = URL.createObjectURL(file);
+    }
+
     const newVideo: VideoItem = {
       id: 'vdo_' + Date.now(),
       title: title || file.name,

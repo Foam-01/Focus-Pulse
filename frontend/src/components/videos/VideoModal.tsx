@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { VideoItem } from '../../types';
-import { X, CheckCircle, Sparkles } from 'lucide-react';
+import { X, CheckCircle, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface VideoModalProps {
   video: VideoItem | null;
@@ -17,6 +17,8 @@ export const VideoModal: React.FC<VideoModalProps> = ({
   isRewardMode = false,
   onFinishSession,
 }) => {
+  const [hasVideoError, setHasVideoError] = useState<boolean>(false);
+
   if (!video) return null;
 
   const handleFinish = () => {
@@ -82,26 +84,41 @@ export const VideoModal: React.FC<VideoModalProps> = ({
           </button>
         </div>
 
-        {/* Natural Video Player */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#000', borderRadius: '18px', overflow: 'hidden', padding: '0.2rem' }}>
-          <video
-            controls
-            autoPlay
-            loop
-            src={video.src}
-            poster={video.poster}
-            style={{
-              maxWidth: '85vw',
-              maxHeight: '65vh',
-              width: 'auto',
-              height: 'auto',
-              display: 'block',
-              borderRadius: '16px',
-              objectFit: 'contain',
-            }}
-          >
-            เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
-          </video>
+        {/* Natural Video Player or Fallback Alert */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#000', borderRadius: '18px', overflow: 'hidden', padding: '0.2rem', minHeight: '260px' }}>
+          {hasVideoError ? (
+            <div style={{ padding: '2.5rem 1.5rem', textAlign: 'center', color: '#ffffff' }}>
+              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.16)', color: '#f43f5e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <AlertTriangle size={28} />
+              </div>
+              <h4 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                ไม่สามารถเล่นวิดีโอนี้ได้
+              </h4>
+              <p style={{ fontSize: '0.86rem', color: 'rgba(255,255,255,0.7)', maxWidth: '440px', margin: '0 auto 1.2rem auto', lineHeight: 1.5 }}>
+                เนื่องจากไฟล์นี้เป็นลิงก์ Blob ชั่วคราวที่หมดอายุหลังรีเฟรชเบราว์เซอร์ กรุณาลบไฟล์นี้ออกและอัปโหลดวิดีโอนี้ใหม่อีกครั้ง
+              </p>
+            </div>
+          ) : (
+            <video
+              controls
+              autoPlay
+              loop
+              src={video.src}
+              poster={video.poster}
+              onError={() => setHasVideoError(true)}
+              style={{
+                maxWidth: '85vw',
+                maxHeight: '65vh',
+                width: 'auto',
+                height: 'auto',
+                display: 'block',
+                borderRadius: '16px',
+                objectFit: 'contain',
+              }}
+            >
+              เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
+            </video>
+          )}
         </div>
 
         {/* Footer info & Finish Session Action Button */}
