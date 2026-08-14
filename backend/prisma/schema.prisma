@@ -31,6 +31,7 @@ model FocusSession {
   @@index([date, createdAt])
   @@index([createdAt])
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model VideoItem {
