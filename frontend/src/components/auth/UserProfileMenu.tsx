@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { User, LogOut, ShieldCheck, ChevronDown } from 'lucide-react';
+import { AuthUser } from '../../types';
 
 interface UserProfileMenuProps {
-  user: any;
+  user: AuthUser | null;
   onOpenAuth: () => void;
   onOpenMFA: () => void;
 }

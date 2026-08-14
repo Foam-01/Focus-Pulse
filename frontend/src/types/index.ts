@@ -61,6 +61,17 @@ export interface CityClockItem {
   isLocal?: boolean;
 }
 
+export interface AuthUser {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+  };
+}
+
+export const DEFAULT_DAILY_GOAL_MINUTES = 480;
+
 export type ActiveView =
   | 'dashboardView'
   | 'timerView'

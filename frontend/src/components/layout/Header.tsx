@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ActiveView } from '../../types';
+import { ActiveView, AuthUser } from '../../types';
 import { Sun, Moon, Menu } from 'lucide-react';
 import { UserProfileMenu } from '../auth/UserProfileMenu';
 
@@ -10,7 +10,7 @@ interface HeaderProps {
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
   onOpenHistoryModal: () => void;
-  user: any;
+  user: AuthUser | null;
   onOpenAuth: () => void;
   onOpenMFA: () => void;
   onToggleMobileMenu?: () => void;

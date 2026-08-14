@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { X, ShieldCheck, QrCode, Key, CheckCircle2, Lock } from 'lucide-react';
+import { AuthUser } from '../../types';
 
 interface MFASecurityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: any;
+  user: AuthUser | null;
 }
 
 export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onClose, user }) => {

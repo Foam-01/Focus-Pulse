@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ActiveView } from '../types';
+import { ActiveView, AuthUser } from '../types';
 import { supabase } from '../lib/supabase';
 import dynamic from 'next/dynamic';
 import { Sidebar } from '../components/layout/Sidebar';
@@ -68,7 +68,7 @@ export default function HomePage() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
 
   // Supabase Auth State & Modals
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isMFAModalOpen, setIsMFAModalOpen] = useState<boolean>(false);

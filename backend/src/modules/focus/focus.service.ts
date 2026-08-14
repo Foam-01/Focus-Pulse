@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateSessionDto, UpdateGoalDto } from './dto/create-session.dto';
+import { CreateSessionDto, UpdateGoalDto, UpdateSessionDto } from './dto/create-session.dto';
 
 export interface FocusSessionRecord {
   id: string;
@@ -89,7 +89,7 @@ export class FocusService {
     };
   }
 
-  async updateSession(id: string, dto: any, userId?: string): Promise<FocusSessionRecord | null> {
+  async updateSession(id: string, dto: UpdateSessionDto, userId?: string): Promise<FocusSessionRecord | null> {
     try {
       const updated = await this.prisma.focusSession.update({
         where: { id },

@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { X, ShieldCheck } from 'lucide-react';
+import { AuthUser } from '../../types';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: any) => void;
+  onSuccess: (user: AuthUser) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {

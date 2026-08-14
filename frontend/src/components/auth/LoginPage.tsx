@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { AuthUser } from '../../types';
 
 interface LoginPageProps {
-  onLoginSuccess: (user: any) => void;
+  onLoginSuccess: (user: AuthUser) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
