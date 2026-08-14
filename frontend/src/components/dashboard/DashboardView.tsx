@@ -6,8 +6,13 @@ import { ApiService } from '../../services/api';
 import { KPICard } from './KPICard';
 import { AnalyticsChart } from './AnalyticsChart';
 import { GoalStepper } from './GoalStepper';
+import { Timer, ArrowRight } from 'lucide-react';
 
-export const DashboardView: React.FC = () => {
+interface DashboardViewProps {
+  onNavigateToTimer?: () => void;
+}
+
+export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigateToTimer }) => {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>('day');
 
@@ -49,7 +54,49 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div>
-      {/* Top KPI Cards Grid (Styled after Image 2 reference with dark theme accents) */}
+      {/* Quick Action CTA Banner for First-Time / Returning Users */}
+      {onNavigateToTimer && (
+        <div
+          className="glass-card"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            padding: '1.2rem 1.6rem',
+            marginBottom: '1.8rem',
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(96, 165, 250, 0.08))',
+            border: '1px solid rgba(59, 130, 246, 0.25)',
+            borderRadius: '20px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'linear-gradient(135deg, #2563eb, #60a5fa)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Timer size={22} />
+            </div>
+            <div>
+              <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                พร้อมเริ่มโฟกัสงานตอนนี้หรือยัง?
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0.15rem 0 0 0' }}>
+                กดปุ่มเริ่มจับเวลาเพื่อสะสมนาทีโฟกัสและพิชิตเป้าหมายประจำวันของคุณ
+              </p>
+            </div>
+          </div>
+
+          <button
+            className="btn-primary-gradient"
+            onClick={onNavigateToTimer}
+            style={{ padding: '0.7rem 1.4rem', borderRadius: '14px', fontSize: '0.88rem', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <span>เริ่มจับเวลาโฟกัส</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Top KPI Cards Grid */}
       <div className="kpi-cards-grid">
         <KPICard
           title="เวลาโฟกัสวันนี้"

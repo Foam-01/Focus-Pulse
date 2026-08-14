@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ActiveView } from '../../types';
-import { Sun, Moon, History } from 'lucide-react';
+import { Sun, Moon, Menu } from 'lucide-react';
 import { UserProfileMenu } from '../auth/UserProfileMenu';
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
   user: any;
   onOpenAuth: () => void;
   onOpenMFA: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
@@ -58,6 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   onOpenAuth,
   onOpenMFA,
+  onToggleMobileMenu,
 }) => {
   const currentHeader = HEADER_TITLES[activeView] || HEADER_TITLES.dashboardView;
 
@@ -69,9 +71,31 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="top-header-bar">
-      <div className="header-titles-group">
-        <h1 className="header-active-title">{currentHeader.title}</h1>
-        <p className="header-active-sub">{currentHeader.sub}</p>
+      <div className="header-titles-group" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+        {onToggleMobileMenu && (
+          <button
+            className="mobile-menu-btn"
+            onClick={onToggleMobileMenu}
+            title="เปิดเมนู"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              color: 'var(--text-main)',
+              borderRadius: '12px',
+              padding: '0.55rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
+        <div>
+          <h1 className="header-active-title">{currentHeader.title}</h1>
+          <p className="header-active-sub">{currentHeader.sub}</p>
+        </div>
       </div>
 
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

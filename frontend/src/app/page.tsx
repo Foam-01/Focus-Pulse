@@ -11,34 +11,41 @@ import { TimerView } from '../components/timer/TimerView';
 import { LoginPage } from '../components/auth/LoginPage';
 
 // Dynamic imports for secondary views & modals to optimize initial JS bundle size
+const renderLoadingCard = (text: string) => (
+  <div className="glass-card" style={{ padding: '3.5rem 2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+    <div style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid var(--border-card)', borderTopColor: 'var(--blue-sky)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: '1rem' }} />
+    <div>{text}</div>
+  </div>
+);
+
 const VideoLibraryView = dynamic(
   () => import('../components/videos/VideoLibraryView').then((mod) => mod.VideoLibraryView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดคลังวิดีโอ...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดคลังวิดีโอ...') }
 );
 
 const MultiTimerView = dynamic(
   () => import('../components/timer/MultiTimerView').then((mod) => mod.MultiTimerView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดตัวจับเวลา...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดตัวจับเวลา...') }
 );
 
 const AlarmView = dynamic(
   () => import('../components/alarm/AlarmView').then((mod) => mod.AlarmView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดนาฬิกาปลุก...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดนาฬิกาปลุก...') }
 );
 
 const StopwatchView = dynamic(
   () => import('../components/stopwatch/StopwatchView').then((mod) => mod.StopwatchView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดจับเวลาเดินหน้า...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดจับเวลาเดินหน้า...') }
 );
 
 const WorldClockView = dynamic(
   () => import('../components/worldclock/WorldClockView').then((mod) => mod.WorldClockView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดเวลาโลก...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดเวลาโลก...') }
 );
 
 const HistoryView = dynamic(
   () => import('../components/history/HistoryView').then((mod) => mod.HistoryView),
-  { loading: () => <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดประวัติ...</div> }
+  { loading: () => renderLoadingCard('กำลังโหลดประวัติ...') }
 );
 
 const HistoryModal = dynamic(
@@ -56,6 +63,7 @@ const MFASecurityModal = dynamic(
 export default function HomePage() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboardView');
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
 
@@ -122,6 +130,8 @@ export default function HomePage() {
         setActiveView={setActiveView}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
+        isMobileOpen={isMobileOpen}
+        onCloseMobile={() => setIsMobileOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -135,10 +145,13 @@ export default function HomePage() {
           user={user}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenMFA={() => setIsMFAModalOpen(true)}
+          onToggleMobileMenu={() => setIsMobileOpen((prev) => !prev)}
         />
 
         {/* Dynamic Section Views */}
-        {activeView === 'dashboardView' && <DashboardView />}
+        {activeView === 'dashboardView' && (
+          <DashboardView onNavigateToTimer={() => setActiveView('timerView')} />
+        )}
         {activeView === 'timerView' && <TimerView />}
         {activeView === 'historyView' && <HistoryView />}
         {activeView === 'multiTimerView' && <MultiTimerView />}
