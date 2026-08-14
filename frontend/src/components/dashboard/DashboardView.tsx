@@ -37,7 +37,12 @@ export const DashboardView: React.FC = () => {
   };
 
   if (!summary) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>กำลังโหลดข้อมูล...</div>;
+    return (
+      <div className="glass-card" style={{ padding: '3.5rem 2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+        <div style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid var(--border-card)', borderTopColor: 'var(--blue-sky)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: '1rem' }} />
+        <div>กำลังโหลดข้อมูล...</div>
+      </div>
+    );
   }
 
   const hoursToday = (summary.todayMinutes / 60).toFixed(1).replace('.0', '');

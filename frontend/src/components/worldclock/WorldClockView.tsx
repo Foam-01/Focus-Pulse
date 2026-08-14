@@ -109,27 +109,6 @@ export const WorldClockView: React.FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Action Bar (Add City Button) */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.2rem' }}>
-        <button
-          className="btn-primary-gradient"
-          onClick={() => setIsAddModalOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.4rem',
-            borderRadius: '14px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-blue)',
-          }}
-        >
-          <Plus size={18} />
-          <span>เพิ่มเมือง</span>
-        </button>
-      </div>
-
       {/* World Map Header Box (Large Spacious Map Display) */}
       <div
         className="glass-card"
@@ -226,6 +205,28 @@ export const WorldClockView: React.FC = () => {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', background: 'var(--bg-subtle)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-card)', padding: '0.4rem 0.9rem', borderRadius: '14px', fontWeight: 700, fontSize: '0.82rem' }}>
             <Globe size={15} style={{ color: 'var(--blue-sky)' }} /> แผนที่โซนเวลาโลก 
           </div>
+        </div>
+
+        {/* Top-Right Add City Button Inside Map Image */}
+        <div style={{ position: 'absolute', top: '1.2rem', right: '1.4rem', zIndex: 10 }}>
+          <button
+            className="btn-primary-gradient"
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.65rem 1.3rem',
+              borderRadius: '14px',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-blue)',
+            }}
+          >
+            <Plus size={18} />
+            <span>เพิ่มเมือง</span>
+          </button>
         </div>
       </div>
 

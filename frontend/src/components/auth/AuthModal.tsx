@@ -286,19 +286,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               <input
                 type="text"
                 required
+                className="app-input"
                 placeholder="ชื่อ หรือ สมญานาม"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.78rem 1rem',
-                  borderRadius: '14px',
-                  border: '1px solid var(--border-card)',
-                  background: 'var(--bg-subtle)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.92rem',
-                  outline: 'none',
-                }}
               />
             </div>
           )}
@@ -310,19 +301,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             <input
               type="email"
               required
+              className="app-input"
               placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.78rem 1rem',
-                borderRadius: '14px',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-subtle)',
-                color: 'var(--text-main)',
-                fontSize: '0.92rem',
-                outline: 'none',
-              }}
             />
           </div>
 
@@ -334,19 +316,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               type="password"
               required
               minLength={6}
+              className="app-input"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.78rem 1rem',
-                borderRadius: '14px',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-subtle)',
-                color: 'var(--text-main)',
-                fontSize: '0.92rem',
-                outline: 'none',
-              }}
             />
           </div>
 
