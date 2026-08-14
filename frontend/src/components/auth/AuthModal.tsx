@@ -147,6 +147,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
   return (
     <div
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="หน้าต่างเข้าสู่ระบบและสมัครสมาชิก"
       style={{
         position: 'fixed',
         inset: 0,
@@ -161,6 +165,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     >
       <div
         className="glass-card"
+        onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
           maxWidth: '440px',
@@ -177,6 +182,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="ปิดหน้าต่าง"
           style={{
             position: 'absolute',
             top: '1.2rem',

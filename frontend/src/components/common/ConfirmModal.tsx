@@ -27,7 +27,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay" onClick={onCancel} role="dialog" aria-modal="true" aria-label={title}>
       <div
         className="glass-card"
         onClick={(e) => e.stopPropagation()}

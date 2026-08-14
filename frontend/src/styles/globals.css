@@ -747,6 +747,16 @@ body {
   }
 }
 
+/* Global High-Contrast Focus Ring for Keyboard Navigation (Accessibility) */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--blue-sky) !important;
+  outline-offset: 3px !important;
+}
+
 .mobile-menu-btn {
   display: none !important;
 }
@@ -779,5 +789,31 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 0.8rem;
+  }
+}
+
+/* Extra Small Mobile Devices (320px - 380px) */
+@media (max-width: 380px) {
+  .app-main-content {
+    padding: 0.75rem !important;
+  }
+
+  .modal-content-box,
+  .app-modal-content {
+    padding: 1.4rem 1.1rem !important;
+    border-radius: 20px !important;
+  }
+
+  .timer-circle-wrapper {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
+  .timer-display-text {
+    font-size: 2.8rem !important;
+  }
+
+  .header-active-title {
+    font-size: 1.35rem !important;
   }
 }

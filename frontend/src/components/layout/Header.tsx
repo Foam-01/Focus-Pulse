@@ -77,6 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="mobile-menu-btn"
             onClick={onToggleMobileMenu}
             title="เปิดเมนู"
+            aria-label="เปิดเมนูนำทางไซด์บาร์"
             style={{
               background: 'var(--bg-card)',
               border: '1px solid var(--border-card)',
@@ -99,7 +100,12 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <button className="theme-toggle-btn" onClick={toggleTheme} title="สลับธีม">
+        <button
+          className="theme-toggle-btn"
+          onClick={toggleTheme}
+          title="สลับธีม"
+          aria-label={theme === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'}
+        >
           {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
           <span>{theme === 'dark' ? 'มืด' : 'สว่าง'}</span>
         </button>

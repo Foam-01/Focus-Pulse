@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
+      <aside aria-label="เมนูหลักของแอปพลิเคชัน" className={`app-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="brand-group">
             <div className="brand-icon">
@@ -95,6 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="sidebar-toggle-btn"
             onClick={() => setIsCollapsed(!isCollapsed)}
             title="ย่อ/ขยายเมนู"
+            aria-label={isCollapsed ? 'ขยายแถบเมนู' : 'ย่อแถบเมนู'}
+            aria-expanded={!isCollapsed}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
