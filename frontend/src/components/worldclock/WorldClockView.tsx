@@ -140,6 +140,7 @@ export const WorldClockView: React.FC = () => {
         <img
           src="/images/world_map_vector.png"
           alt="World Map Graphic"
+          loading="lazy"
           style={{
             position: 'absolute',
             inset: 0,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ApiService } from '../../services/api';
 import { VideoItem, AnalyticsSummary, FocusSessionRecord } from '../../types';
 import { VideoModal } from '../videos/VideoModal';
@@ -185,22 +185,24 @@ export const TimerView: React.FC = () => {
     };
   }, [isRunning, focusMinutes]);
 
-  const selectPresetMinutes = (mins: number) => {
+  const selectPresetMinutes = useCallback((mins: number) => {
     if (isRunning) return;
     setFocusMinutes(mins);
     setFocusMinutesInput(String(mins));
     setRemainingSeconds(mins * 60);
     setSessionStatus('พร้อมเริ่มโฟกัส');
-  };
+  }, [isRunning]);
 
-  const adjustMinutes = (delta: number) => {
+  const adjustMinutes = useCallback((delta: number) => {
     if (isRunning) return;
-    const newMins = Math.min(480, Math.max(1, focusMinutes + delta));
-    setFocusMinutes(newMins);
-    setFocusMinutesInput(String(newMins));
-    setRemainingSeconds(newMins * 60);
+    setFocusMinutes((prev) => {
+      const newMins = Math.min(480, Math.max(1, prev + delta));
+      setFocusMinutesInput(String(newMins));
+      setRemainingSeconds(newMins * 60);
+      return newMins;
+    });
     setSessionStatus('พร้อมเริ่มโฟกัส');
-  };
+  }, [isRunning]);
 
   // Handle direct custom typing into the minute display box
   const handleMinutesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,7 +237,7 @@ export const TimerView: React.FC = () => {
     setSessionStatus('พร้อมเริ่มโฟกัส');
   };
 
-  const toggleTimer = () => {
+  const toggleTimer = useCallback(() => {
     if (isRunning) {
       setIsRunning(false);
       setSessionStatus('หยุดพักชั่วคราว');
@@ -243,13 +245,13 @@ export const TimerView: React.FC = () => {
       setIsRunning(true);
       setSessionStatus('กำลังโฟกัส...');
     }
-  };
+  }, [isRunning]);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     setIsRunning(false);
     setRemainingSeconds(focusMinutes * 60);
     setSessionStatus('พร้อมเริ่มโฟกัส');
-  };
+  }, [focusMinutes]);
 
   const testQuickFinish = () => {
     setRemainingSeconds(3);
