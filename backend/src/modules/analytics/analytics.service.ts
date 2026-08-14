@@ -48,8 +48,8 @@ export class AnalyticsService {
       dateMap.set(record.date, (dateMap.get(record.date) || 0) + record.duration);
     });
 
-    // Calculate Chart Data based on timeframe
-    const chartData = this.generateChartData(dateMap, timeframe);
+    // Calculate Chart Data based on timeframe using 100% real history records
+    const chartData = this.generateChartData(dateMap, history, timeframe);
 
     return {
       todayMinutes,
@@ -93,7 +93,7 @@ export class AnalyticsService {
     return streak;
   }
 
-  private generateChartData(dateMap: Map<string, number>, timeframe: 'day' | 'week' | 'month') {
+  private generateChartData(dateMap: Map<string, number>, history: any[], timeframe: 'day' | 'week' | 'month') {
     const chartMap = new Map<string, number>();
 
     if (timeframe === 'day') {
@@ -107,16 +107,46 @@ export class AnalyticsService {
         chartMap.set(key, dayTotal);
       }
     } else if (timeframe === 'week') {
+      const now = new Date();
       for (let i = 3; i >= 0; i--) {
-        const label = `สัปดาห์ ${4 - i}`;
-        chartMap.set(label, Math.floor(Math.random() * 200) + 100);
+        const weekNum = 4 - i;
+        const label = `สัปดาห์ ${weekNum}`;
+        const endDaysAgo = i * 7;
+        const startDaysAgo = (i + 1) * 7 - 1;
+
+        const startDate = new Date();
+        startDate.setDate(now.getDate() - startDaysAgo);
+        startDate.setHours(0, 0, 0, 0);
+
+        const endDate = new Date();
+        endDate.setDate(now.getDate() - endDaysAgo);
+        endDate.setHours(23, 59, 59, 999);
+
+        let weekTotal = 0;
+        history.forEach((rec) => {
+          if (rec.date) {
+            const recDate = new Date(rec.date);
+            if (recDate >= startDate && recDate <= endDate) {
+              weekTotal += rec.duration;
+            }
+          }
+        });
+        chartMap.set(label, weekTotal);
       }
     } else {
       for (let i = 5; i >= 0; i--) {
         const d = new Date();
         d.setMonth(d.getMonth() - i);
         const label = d.toLocaleDateString('th-TH', { month: 'short' });
-        chartMap.set(label, Math.floor(Math.random() * 600) + 300);
+        const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+        let monthTotal = 0;
+        history.forEach((rec) => {
+          if (rec.date && rec.date.startsWith(yearMonth)) {
+            monthTotal += rec.duration;
+          }
+        });
+        chartMap.set(label, monthTotal);
       }
     }
 

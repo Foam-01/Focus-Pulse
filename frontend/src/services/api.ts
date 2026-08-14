@@ -167,38 +167,63 @@ export const ApiService = {
       dateMap.set(rec.date, (dateMap.get(rec.date) || 0) + rec.duration);
     });
 
-    // Dynamic Chart Data Generation based on selected timeframe
+    // Dynamic Chart Data Generation based on 100% real history records
     let chartData: { label: string; value: number }[] = [];
 
     if (timeframe === 'day') {
-      // 7 Days
+      // 7 Days: Calculate REAL sum per day (0 if no focus session on that day)
       const daysOfWeek = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-      const defaultDailyValues = [45, 60, 90, 120, 75, 110, 85];
-
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dayLabel = daysOfWeek[d.getDay()];
         const dateStr = d.toLocaleDateString('sv-SE');
-        const val = dateMap.has(dateStr) ? dateMap.get(dateStr)! : defaultDailyValues[6 - i];
+        const val = dateMap.get(dateStr) || 0;
         chartData.push({ label: dayLabel, value: val });
       }
     } else if (timeframe === 'week') {
-      // 4 Weeks
-      const defaultWeeklyValues = [320, 480, 610, 540];
+      // 4 Weeks: Calculate REAL sum per week block (0 if no data)
+      const now = new Date();
       for (let i = 3; i >= 0; i--) {
         const weekLabel = `สัปดาห์ ${4 - i}`;
-        chartData.push({ label: weekLabel, value: defaultWeeklyValues[3 - i] });
+        const endDaysAgo = i * 7;
+        const startDaysAgo = (i + 1) * 7 - 1;
+
+        const startDate = new Date();
+        startDate.setDate(now.getDate() - startDaysAgo);
+        startDate.setHours(0, 0, 0, 0);
+
+        const endDate = new Date();
+        endDate.setDate(now.getDate() - endDaysAgo);
+        endDate.setHours(23, 59, 59, 999);
+
+        let weekTotal = 0;
+        history.forEach((rec) => {
+          if (rec.date) {
+            const recDate = new Date(rec.date);
+            if (recDate >= startDate && recDate <= endDate) {
+              weekTotal += rec.duration;
+            }
+          }
+        });
+        chartData.push({ label: weekLabel, value: weekTotal });
       }
     } else {
-      // 6 Months
+      // 6 Months: Calculate REAL sum per month (0 if no data)
       const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-      const defaultMonthlyValues = [1420, 1850, 2100, 1980, 2450, 2600];
       for (let i = 5; i >= 0; i--) {
         const d = new Date();
         d.setMonth(d.getMonth() - i);
         const monthLabel = thaiMonths[d.getMonth()];
-        chartData.push({ label: monthLabel, value: defaultMonthlyValues[5 - i] });
+        const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+        let monthTotal = 0;
+        history.forEach((rec) => {
+          if (rec.date && rec.date.startsWith(yearMonth)) {
+            monthTotal += rec.duration;
+          }
+        });
+        chartData.push({ label: monthLabel, value: monthTotal });
       }
     }
 

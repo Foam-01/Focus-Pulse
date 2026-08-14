@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'เซสชันโฟกัส - แดชบอร์ดสรุปเวลา & ตัวจับเวลา 25 นาที',
-  description: 'แอปพลิเคชันจับเวลาโฟกัสการทำงาน 25 นาที พร้อมแดชบอร์ดสรุปเวลาโฟกัส กราฟวิเคราะห์ และคลังวิดีโอผ่อนคลาย',
+  title: 'Focus Pulse - ระบบติดตามเวลาและตั้งเป้าหมายโฟกัสงาน',
+  description: 'แอปพลิเคชัน Focus Pulse สำหรับจับเวลาโฟกัส Pomodoro สรุปสถิติการทำงานประจำวัน คลังวิดีโอพักสายตา และเทียบเวลาโลก',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -14,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="th" data-theme="dark">
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
