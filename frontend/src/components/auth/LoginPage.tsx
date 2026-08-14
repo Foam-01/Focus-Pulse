@@ -65,16 +65,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           signUpUser = data.user;
           signUpSession = data.session;
         } catch (regErr: any) {
-          // If signUp threw email rate limit or already registered, attempt auto signInWithPassword
-          const regErrMsg = regErr.message || '';
-          if (regErrMsg.includes('rate limit') || regErrMsg.includes('already registered')) {
-            const { data: directSignIn, error: directErr } = await supabase.auth.signInWithPassword({
+          const regErrMsg = (regErr.message || '').toLowerCase();
+          if (regErrMsg.includes('already registered') || regErrMsg.includes('user_already_exists')) {
+            throw new Error('อีเมลนี้ถูกลงทะเบียนแล้ว กรุณาสลับไปที่แท็บ "เข้าสู่ระบบ" เพื่อใช้งาน');
+          }
+          if (regErrMsg.includes('rate limit')) {
+            const { data: directSignIn } = await supabase.auth.signInWithPassword({
               email: cleanEmail,
               password,
             });
 
             if (directSignIn?.user) {
-              setSuccessMsg('เข้าสู่ระบบด้วยบัญชีของคุณเรียบร้อยแล้ว!');
+              setSuccessMsg('เข้าสู่ระบบเรียบร้อยแล้ว!');
               setTimeout(() => {
                 onLoginSuccess(directSignIn.user);
               }, 800);
@@ -91,19 +93,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               onLoginSuccess(signUpUser);
             }, 800);
           } else {
-            // Attempt auto-login immediately in case confirm email is disabled or auto-confirmed
+            // Attempt auto-login with newly registered credentials
             const { data: signInData } = await supabase.auth.signInWithPassword({
               email: cleanEmail,
               password,
             });
 
             if (signInData?.user) {
-              setSuccessMsg('สมัครสมาชิกสำเร็จและเข้าสู่ระบบเรียบร้อยแล้ว!');
+              setSuccessMsg('สมัครสมาชิกและเข้าสู่ระบบเรียบร้อยแล้ว!');
               setTimeout(() => {
                 onLoginSuccess(signInData.user);
               }, 800);
             } else {
-              setSuccessMsg('สมัครสมาชิกสำเร็จแล้ว! หากไม่สามารถเข้าสู่ระบบอัตโนมัติได้ โปรดตรวจสอบว่าปิด "Confirm Email" ใน Supabase Dashboard หรือยัง');
+              setSuccessMsg('สมัครสมาชิกสำเร็จแล้ว! กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่านของคุณ');
               setMode('login');
             }
           }

@@ -15,8 +15,9 @@ export interface FocusSessionRecord {
 export class FocusService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getHistory(): Promise<FocusSessionRecord[]> {
+  async getHistory(userId?: string): Promise<FocusSessionRecord[]> {
     const list = await this.prisma.focusSession.findMany({
+      where: userId ? { userId } : {},
       orderBy: { createdAt: 'desc' },
     });
     return list.map((item) => ({
@@ -29,26 +30,48 @@ export class FocusService {
     }));
   }
 
-  async getDailyGoal(): Promise<number> {
-    const settings = await this.prisma.userSettings.findUnique({
-      where: { id: 'default' },
+  async getDailyGoal(userId?: string): Promise<number> {
+    if (!userId) {
+      const defaultSetting = await this.prisma.userSettings.findFirst({
+        where: { id: 'default' },
+      });
+      return defaultSetting ? defaultSetting.dailyGoalMinutes : 480;
+    }
+
+    const settings = await this.prisma.userSettings.findFirst({
+      where: { userId },
     });
     return settings ? settings.dailyGoalMinutes : 480;
   }
 
-  async updateDailyGoal(dto: UpdateGoalDto): Promise<number> {
-    const updated = await this.prisma.userSettings.upsert({
-      where: { id: 'default' },
-      update: { dailyGoalMinutes: dto.dailyGoalMinutes },
-      create: { id: 'default', dailyGoalMinutes: dto.dailyGoalMinutes },
+  async updateDailyGoal(dto: UpdateGoalDto, userId?: string): Promise<number> {
+    const targetUserId = userId || 'guest';
+    const existing = await this.prisma.userSettings.findFirst({
+      where: { userId: targetUserId },
     });
-    return updated.dailyGoalMinutes;
+
+    if (existing) {
+      const updated = await this.prisma.userSettings.update({
+        where: { id: existing.id },
+        data: { dailyGoalMinutes: dto.dailyGoalMinutes },
+      });
+      return updated.dailyGoalMinutes;
+    } else {
+      const created = await this.prisma.userSettings.create({
+        data: {
+          userId: targetUserId,
+          dailyGoalMinutes: dto.dailyGoalMinutes,
+        },
+      });
+      return created.dailyGoalMinutes;
+    }
   }
 
-  async createSession(dto: CreateSessionDto): Promise<FocusSessionRecord> {
+  async createSession(dto: CreateSessionDto, userId?: string): Promise<FocusSessionRecord> {
     const now = new Date();
     const created = await this.prisma.focusSession.create({
       data: {
+        userId: userId || null,
         date: dto.date || now.toLocaleDateString('sv-SE'),
         time: dto.time || now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
         duration: Number(dto.duration),
@@ -66,7 +89,7 @@ export class FocusService {
     };
   }
 
-  async updateSession(id: string, dto: any): Promise<FocusSessionRecord | null> {
+  async updateSession(id: string, dto: any, userId?: string): Promise<FocusSessionRecord | null> {
     try {
       const updated = await this.prisma.focusSession.update({
         where: { id },
@@ -90,7 +113,7 @@ export class FocusService {
     }
   }
 
-  async deleteSession(id: string): Promise<boolean> {
+  async deleteSession(id: string, userId?: string): Promise<boolean> {
     try {
       await this.prisma.focusSession.delete({
         where: { id },
@@ -101,7 +124,13 @@ export class FocusService {
     }
   }
 
-  async resetAllHistory(): Promise<void> {
-    await this.prisma.focusSession.deleteMany({});
+  async resetAllHistory(userId?: string): Promise<void> {
+    if (userId) {
+      await this.prisma.focusSession.deleteMany({
+        where: { userId },
+      });
+    } else {
+      await this.prisma.focusSession.deleteMany({});
+    }
   }
 }

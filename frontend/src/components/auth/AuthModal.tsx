@@ -53,15 +53,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           signUpUser = data.user;
           signUpSession = data.session;
         } catch (regErr: any) {
-          const regErrMsg = regErr.message || '';
-          if (regErrMsg.includes('rate limit') || regErrMsg.includes('already registered')) {
+          const regErrMsg = (regErr.message || '').toLowerCase();
+          if (regErrMsg.includes('already registered') || regErrMsg.includes('user_already_exists')) {
+            throw new Error('อีเมลนี้ถูกลงทะเบียนแล้ว กรุณาสลับไปที่แท็บ "เข้าสู่ระบบ" เพื่อใช้งาน');
+          }
+          if (regErrMsg.includes('rate limit')) {
             const { data: directSignIn } = await supabase.auth.signInWithPassword({
               email: cleanEmail,
               password,
             });
 
             if (directSignIn?.user) {
-              setSuccessMsg('เข้าสู่ระบบด้วยบัญชีของคุณเรียบร้อยแล้ว!');
+              setSuccessMsg('เข้าสู่ระบบเรียบร้อยแล้ว!');
               setTimeout(() => {
                 onSuccess(directSignIn.user);
                 onClose();

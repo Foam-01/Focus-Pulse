@@ -15,9 +15,9 @@ export interface AnalyticsSummary {
 export class AnalyticsService {
   constructor(private readonly focusService: FocusService) {}
 
-  async getSummary(timeframe: 'day' | 'week' | 'month' = 'day'): Promise<AnalyticsSummary> {
-    const history = await this.focusService.getHistory();
-    const dailyGoalMinutes = await this.focusService.getDailyGoal();
+  async getSummary(userId?: string, timeframe: 'day' | 'week' | 'month' = 'day'): Promise<AnalyticsSummary> {
+    const history = await this.focusService.getHistory(userId);
+    const dailyGoalMinutes = await this.focusService.getDailyGoal(userId);
 
     const todayStr = new Date().toLocaleDateString('sv-SE');
     const yesterdayObj = new Date();

@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Headers,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -17,18 +18,21 @@ export class FocusController {
   constructor(private readonly focusService: FocusService) {}
 
   @Get('history')
-  async getHistory(): Promise<FocusSessionRecord[]> {
-    return await this.focusService.getHistory();
+  async getHistory(@Headers('x-user-id') userId?: string): Promise<FocusSessionRecord[]> {
+    return await this.focusService.getHistory(userId);
   }
 
   @Post('history')
-  async createSession(@Body() dto: CreateSessionDto): Promise<FocusSessionRecord> {
-    return await this.focusService.createSession(dto);
+  async createSession(
+    @Headers('x-user-id') userId: string,
+    @Body() dto: CreateSessionDto,
+  ): Promise<FocusSessionRecord> {
+    return await this.focusService.createSession(dto, userId);
   }
 
   @Delete('history/:id')
-  async deleteSession(@Param('id') id: string) {
-    const success = await this.focusService.deleteSession(id);
+  async deleteSession(@Headers('x-user-id') userId: string, @Param('id') id: string) {
+    const success = await this.focusService.deleteSession(id, userId);
     if (!success) {
       throw new NotFoundException(`Session record with ID ${id} not found`);
     }
@@ -36,8 +40,12 @@ export class FocusController {
   }
 
   @Post('history/:id')
-  async updateSessionPost(@Param('id') id: string, @Body() dto: UpdateSessionDto) {
-    const updated = await this.focusService.updateSession(id, dto);
+  async updateSessionPost(
+    @Headers('x-user-id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateSessionDto,
+  ) {
+    const updated = await this.focusService.updateSession(id, dto, userId);
     if (!updated) {
       throw new NotFoundException(`Session record with ID ${id} not found`);
     }
@@ -46,20 +54,20 @@ export class FocusController {
 
   @Delete('history')
   @HttpCode(HttpStatus.OK)
-  async resetAllHistory() {
-    await this.focusService.resetAllHistory();
+  async resetAllHistory(@Headers('x-user-id') userId?: string) {
+    await this.focusService.resetAllHistory(userId);
     return { success: true, message: 'All history reset successfully' };
   }
 
   @Get('goal')
-  async getDailyGoal() {
-    const goal = await this.focusService.getDailyGoal();
+  async getDailyGoal(@Headers('x-user-id') userId?: string) {
+    const goal = await this.focusService.getDailyGoal(userId);
     return { dailyGoalMinutes: goal };
   }
 
   @Post('goal')
-  async updateDailyGoal(@Body() dto: UpdateGoalDto) {
-    const updated = await this.focusService.updateDailyGoal(dto);
+  async updateDailyGoal(@Headers('x-user-id') userId: string, @Body() dto: UpdateGoalDto) {
+    const updated = await this.focusService.updateDailyGoal(dto, userId);
     return { dailyGoalMinutes: updated };
   }
 }

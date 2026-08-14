@@ -1,23 +1,41 @@
 import { FocusSessionRecord, AnalyticsSummary, VideoItem } from '../types';
+import { supabase } from '../lib/supabase';
 
 const API_BASE = '/api';
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabase.auth.getUser();
+    const userId = data.user?.id || 'guest';
+    return {
+      'Content-Type': 'application/json',
+      'x-user-id': userId,
+    };
+  } catch {
+    return { 'Content-Type': 'application/json', 'x-user-id': 'guest' };
+  }
+}
 
 export const ApiService = {
   // --- Focus Sessions History ---
   async getHistory(): Promise<FocusSessionRecord[]> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history`);
+      const res = await fetch(`${API_BASE}/focus/history`, { headers });
       if (res.ok) {
         return await res.json();
       }
     } catch (e) {
       console.warn('Backend API unreachable, using LocalStorage fallback.');
     }
-    const local = localStorage.getItem('focus_history_list');
+    const local = localStorage.getItem(`focus_history_list_${userId}`);
     return local ? JSON.parse(local) : [];
   },
 
   async createSession(session: { date?: string; time?: string; duration: number; tag?: string }): Promise<FocusSessionRecord> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     const now = new Date();
     const payload = {
       date: session.date || now.toLocaleDateString('sv-SE'),
@@ -29,7 +47,7 @@ export const ApiService = {
     try {
       const res = await fetch(`${API_BASE}/focus/history`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
       if (res.ok) {
@@ -49,13 +67,15 @@ export const ApiService = {
 
     const current = await this.getHistory();
     current.unshift(newRecord);
-    localStorage.setItem('focus_history_list', JSON.stringify(current));
+    localStorage.setItem(`focus_history_list_${userId}`, JSON.stringify(current));
     return newRecord;
   },
 
   async deleteSession(id: string): Promise<boolean> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/focus/history/${id}`, { method: 'DELETE', headers });
       if (res.ok) return true;
     } catch (e) {
       console.warn('Backend API unreachable, deleting from LocalStorage.');
@@ -63,15 +83,17 @@ export const ApiService = {
 
     const current = await this.getHistory();
     const updated = current.filter((item) => item.id !== id);
-    localStorage.setItem('focus_history_list', JSON.stringify(updated));
+    localStorage.setItem(`focus_history_list_${userId}`, JSON.stringify(updated));
     return true;
   },
 
   async updateSession(id: string, session: { date?: string; time?: string; duration?: number; tag?: string }): Promise<FocusSessionRecord | null> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     try {
       const res = await fetch(`${API_BASE}/focus/history/${id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(session),
       });
       if (res.ok) {
@@ -91,42 +113,48 @@ export const ApiService = {
         ...(session.duration !== undefined && { duration: Number(session.duration) }),
         ...(session.tag && { tag: session.tag }),
       };
-      localStorage.setItem('focus_history_list', JSON.stringify(current));
+      localStorage.setItem(`focus_history_list_${userId}`, JSON.stringify(current));
       return current[idx];
     }
     return null;
   },
 
   async resetAllHistory(): Promise<boolean> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/focus/history`, { method: 'DELETE', headers });
       if (res.ok) return true;
     } catch (e) {
       console.warn('Backend API unreachable, clearing LocalStorage.');
     }
-    localStorage.removeItem('focus_history_list');
+    localStorage.removeItem(`focus_history_list_${userId}`);
     return true;
   },
 
   // --- Daily Goal ---
   async getDailyGoal(): Promise<number> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/goal`);
+      const res = await fetch(`${API_BASE}/focus/goal`, { headers });
       if (res.ok) {
         const data = await res.json();
         return data.dailyGoalMinutes;
       }
     } catch (e) {}
-    const localGoal = localStorage.getItem('focus_daily_goal');
+    const localGoal = localStorage.getItem(`focus_daily_goal_${userId}`);
     return localGoal ? parseInt(localGoal, 10) : 480;
   },
 
   async updateDailyGoal(dailyGoalMinutes: number): Promise<number> {
-    localStorage.setItem('focus_daily_goal', String(dailyGoalMinutes));
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
+    localStorage.setItem(`focus_daily_goal_${userId}`, String(dailyGoalMinutes));
     try {
       const res = await fetch(`${API_BASE}/focus/goal`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ dailyGoalMinutes }),
       });
       if (res.ok) {
@@ -139,8 +167,9 @@ export const ApiService = {
 
   // --- Analytics Summary ---
   async getAnalyticsSummary(timeframe: 'day' | 'week' | 'month' = 'day'): Promise<AnalyticsSummary> {
+    const headers = await getAuthHeaders();
     try {
-      const res = await fetch(`${API_BASE}/analytics/summary?timeframe=${timeframe}`);
+      const res = await fetch(`${API_BASE}/analytics/summary?timeframe=${timeframe}`, { headers });
       if (res.ok) {
         return await res.json();
       }
