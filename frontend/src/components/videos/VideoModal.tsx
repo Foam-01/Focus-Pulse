@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VideoItem } from '../../types';
 import { X, CheckCircle, Sparkles, AlertTriangle } from 'lucide-react';
 
@@ -18,6 +18,10 @@ export const VideoModal: React.FC<VideoModalProps> = ({
   onFinishSession,
 }) => {
   const [hasVideoError, setHasVideoError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHasVideoError(false);
+  }, [video?.id, video?.src]);
 
   if (!video) return null;
 

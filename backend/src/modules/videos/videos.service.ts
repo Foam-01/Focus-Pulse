@@ -1,5 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface VideoItem {
   id: string;
@@ -42,8 +44,11 @@ export class VideosService implements OnModuleInit {
     const list = await this.prisma.videoItem.findMany({
       orderBy: { createdAt: 'desc' },
     });
+
     // Ensure primary video is sorted to position #1
-    const mapped = list.map((v) => ({
+    const sorted = list.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+
+    return sorted.map((v) => ({
       id: v.id,
       title: v.title,
       category: v.category,
@@ -53,7 +58,6 @@ export class VideosService implements OnModuleInit {
       description: v.description,
       isPrimary: v.isPrimary,
     }));
-    return mapped.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
   }
 
   async getVideoById(id: string): Promise<VideoItem | null> {
@@ -75,6 +79,7 @@ export class VideosService implements OnModuleInit {
     const primary = await this.prisma.videoItem.findFirst({
       where: { isPrimary: true },
     });
+
     if (primary) {
       return {
         id: primary.id,
@@ -87,18 +92,38 @@ export class VideosService implements OnModuleInit {
         isPrimary: true,
       };
     }
-    const all = await this.getAllVideos();
-    return all[0];
+
+    const first = await this.prisma.videoItem.findFirst();
+    if (first) {
+      return {
+        id: first.id,
+        title: first.title,
+        category: first.category,
+        durationStr: first.durationStr,
+        src: first.src,
+        poster: first.poster,
+        description: first.description,
+        isPrimary: false,
+      };
+    }
+
+    return {
+      id: 'vdo_ch',
+      title: 'วิดีโอผ่อนคลายความเครียดหลัก',
+      category: 'ผ่อนคลายหลัก',
+      durationStr: 'ความคมชัดสูง',
+      src: '/Vdo/ch.mp4',
+      poster: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&q=80',
+      description: 'วิดีโอบรรยากาศผ่อนคลายหลักสำหรับเปิดให้อัตโนมัติเมื่อจับเวลาทำงานเสร็จสิ้น',
+      isPrimary: true,
+    };
   }
 
   async setPrimaryVideo(id: string): Promise<VideoItem | null> {
-    // Unset current primary
     await this.prisma.videoItem.updateMany({
-      where: { isPrimary: true },
       data: { isPrimary: false },
     });
 
-    // Set new primary
     const updated = await this.prisma.videoItem.update({
       where: { id },
       data: { isPrimary: true },
@@ -112,7 +137,7 @@ export class VideosService implements OnModuleInit {
       src: updated.src,
       poster: updated.poster,
       description: updated.description,
-      isPrimary: true,
+      isPrimary: updated.isPrimary,
     };
   }
 
@@ -137,7 +162,7 @@ export class VideosService implements OnModuleInit {
       src: created.src,
       poster: created.poster,
       description: created.description,
-      isPrimary: false,
+      isPrimary: created.isPrimary,
     };
   }
 
@@ -152,6 +177,7 @@ export class VideosService implements OnModuleInit {
           ...(updates.src && { src: updates.src }),
           ...(updates.poster && { poster: updates.poster }),
           ...(updates.description && { description: updates.description }),
+          ...(updates.isPrimary !== undefined && { isPrimary: updates.isPrimary }),
         },
       });
 
@@ -173,9 +199,25 @@ export class VideosService implements OnModuleInit {
   async deleteVideo(id: string): Promise<boolean> {
     try {
       const target = await this.prisma.videoItem.findUnique({ where: { id } });
+      if (!target) return false;
+
+      // Delete record from Prisma DB
       await this.prisma.videoItem.delete({ where: { id } });
 
-      if (target?.isPrimary) {
+      // Delete physical file from /public/Vdo/ folder if it is an uploaded file
+      if (target.src && target.src.startsWith('/Vdo/vdo-')) {
+        const fileName = path.basename(target.src);
+        const filePath = path.join(process.cwd(), '..', 'frontend', 'public', 'Vdo', fileName);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            console.warn(`Failed to delete physical file: ${filePath}`, err);
+          }
+        }
+      }
+
+      if (target.isPrimary) {
         const firstRemaining = await this.prisma.videoItem.findFirst();
         if (firstRemaining) {
           await this.prisma.videoItem.update({

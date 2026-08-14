@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AlarmItem } from '../../types';
 import { AlarmCard } from './AlarmCard';
 import { AddAlarmModal } from './AddAlarmModal';
 import { AlarmRingingModal } from './AlarmRingingModal';
-import { Plus, Bell, Sparkles } from 'lucide-react';
+import { Plus, Bell, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DEFAULT_ALARMS: AlarmItem[] = [
   {
@@ -47,6 +47,10 @@ export const AlarmView: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [activeRingingAlarm, setActiveRingingAlarm] = useState<AlarmItem | null>(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
+
   const [editingAlarm, setEditingAlarm] = useState<AlarmItem | null>(null);
   const lastRungKeyRef = useRef<string>('');
 
@@ -66,6 +70,33 @@ export const AlarmView: React.FC = () => {
     setAlarms(DEFAULT_ALARMS);
     localStorage.setItem('focus_alarms_list', JSON.stringify(DEFAULT_ALARMS));
   }, []);
+
+  // Reset page when alarms count changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [alarms.length]);
+
+  // Pagination Calculations
+  const totalPages = Math.ceil(alarms.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAlarms = useMemo(() => {
+    return alarms.slice(startIndex, endIndex);
+  }, [alarms, startIndex, endIndex]);
+
+  // Helper for generating page numbers with dots
+  const getPaginationRange = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 4) {
+      return [1, 2, 3, 4, 5, '...', total];
+    }
+    if (current >= total - 3) {
+      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
 
   // Real-Time Clock Listener
   useEffect(() => {
@@ -110,17 +141,11 @@ export const AlarmView: React.FC = () => {
     localStorage.setItem('focus_alarms_list', JSON.stringify(updated));
   };
 
-  const handleAddOrEditAlarm = (
-    hour: number,
-    minute: number,
-    label: string,
-    repeatDays: number[],
-    existingId?: string
-  ) => {
+  const handleSaveAlarm = (hour: number, minute: number, label: string, repeatDays: number[]) => {
     let updated: AlarmItem[];
-    if (existingId) {
+    if (editingAlarm) {
       updated = alarms.map((a) =>
-        a.id === existingId
+        a.id === editingAlarm.id
           ? { ...a, hour, minute, label, repeatDays, isEnabled: true }
           : a
       );
@@ -248,26 +273,152 @@ export const AlarmView: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
-          {alarms.map((alarm) => (
-            <AlarmCard
-              key={alarm.id}
-              alarm={alarm}
-              onToggle={handleToggleAlarm}
-              onDelete={handleDeleteAlarm}
-              onEdit={(target) => {
-                setEditingAlarm(target);
-                setIsAddModalOpen(true);
+        <>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1.5rem',
+            }}
+          >
+            {paginatedAlarms.map((alarm) => (
+              <AlarmCard
+                key={alarm.id}
+                alarm={alarm}
+                onToggle={handleToggleAlarm}
+                onDelete={handleDeleteAlarm}
+                onEdit={(target) => {
+                  setEditingAlarm(target);
+                  setIsAddModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Pagination Pills Control Bar */}
+          {alarms.length > 0 && (
+            <div
+              className="glass-card"
+              style={{
+                marginTop: '1.8rem',
+                padding: '1rem 1.6rem',
+                borderRadius: '20px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-card)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                boxShadow: 'var(--shadow-sm)',
               }}
-            />
-          ))}
-        </div>
+            >
+              {/* Page Indicator (Left Side) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <span
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: 'rgba(99, 102, 241, 0.14)',
+                    color: '#818cf8',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {currentPage}
+                </span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                  แสดง {startIndex + 1}-{Math.min(endIndex, alarms.length)} จากทั้งหมด {alarms.length} รายการ (หน้า {currentPage}/{totalPages})
+                </span>
+              </div>
+
+              {/* Pills Button Controls (Right Side) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: currentPage === 1 ? 'var(--border-card)' : 'var(--text-main)',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                {getPaginationRange(currentPage, totalPages).map((p, idx) => {
+                  if (p === '...') {
+                    return (
+                      <span key={`dots-${idx}`} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', padding: '0 0.25rem' }}>
+                        ...
+                      </span>
+                    );
+                  }
+
+                  const isAct = currentPage === p;
+                  return (
+                    <button
+                      key={`page-${p}`}
+                      onClick={() => setCurrentPage(p as number)}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        fontSize: '0.88rem',
+                        fontWeight: isAct ? 800 : 600,
+                        background: isAct
+                          ? 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)'
+                          : 'var(--bg-subtle)',
+                        color: isAct ? '#ffffff' : 'var(--text-main)',
+                        border: isAct ? 'none' : '1px solid var(--border-card)',
+                        boxShadow: isAct ? '0 4px 14px rgba(168, 85, 247, 0.4)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: currentPage === totalPages ? 'var(--border-card)' : 'var(--text-main)',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Add / Edit Alarm Modal */}
@@ -278,7 +429,7 @@ export const AlarmView: React.FC = () => {
           setIsAddModalOpen(false);
           setEditingAlarm(null);
         }}
-        onAddAlarm={handleAddOrEditAlarm}
+        onAddAlarm={handleSaveAlarm}
       />
 
       {/* Alarm Ringing Overlay Popup */}

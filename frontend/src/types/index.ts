@@ -68,4 +68,5 @@ export type ActiveView =
   | 'alarmView'
   | 'stopwatchView'
   | 'worldClockView'
-  | 'videoLibraryView';
+  | 'videoLibraryView'
+  | 'historyView';

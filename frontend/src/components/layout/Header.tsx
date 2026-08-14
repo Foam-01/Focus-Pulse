@@ -44,6 +44,10 @@ const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
     title: 'วิดีโอพักสายตา',
     sub: 'วิดีโอผ่อนคลายสำหรับเล่นเมื่อหมดเวลาโฟกัส',
   },
+  historyView: {
+    title: 'ประวัติโฟกัสทั้งหมด',
+    sub: 'ดูประวัติ ค้นหา แก้ไข และจัดการรายการโฟกัสย้อนหลังทั้งหมด',
+  },
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -71,11 +75,6 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <button className="action-btn-secondary" onClick={onOpenHistoryModal}>
-          <History size={18} />
-          <span>ประวัติ</span>
-        </button>
-
         <button className="theme-toggle-btn" onClick={toggleTheme} title="สลับธีม">
           {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
           <span>{theme === 'dark' ? 'มืด' : 'สว่าง'}</span>

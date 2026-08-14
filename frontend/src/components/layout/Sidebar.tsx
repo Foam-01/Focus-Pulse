@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ActiveView } from '../../types';
-import { LayoutDashboard, Timer, Clock, Bell, Watch, Globe, Film, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Timer, Clock, Bell, Watch, Globe, Film, History, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   activeView: ActiveView;
@@ -27,6 +27,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'timerView',
       title: 'จับเวลา',
       icon: <Timer size={20} />,
+    },
+    {
+      id: 'historyView',
+      title: 'ประวัติโฟกัสทั้งหมด',
+      icon: <History size={20} />,
     },
     {
       id: 'multiTimerView',

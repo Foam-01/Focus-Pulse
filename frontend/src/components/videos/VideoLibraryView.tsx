@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { VideoItem } from '../../types';
 import { ApiService } from '../../services/api';
 import { VideoModal } from './VideoModal';
 import { ConfirmModal } from '../common/ConfirmModal';
-import { Play, Star, Upload, Check, Trash2, Pencil, Sparkles, X } from 'lucide-react';
+import { Play, Star, Upload, Check, Trash2, Pencil, Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const VideoLibraryView: React.FC = () => {
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 4;
 
   // Delete Confirm Modal State
   const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
@@ -38,6 +42,33 @@ export const VideoLibraryView: React.FC = () => {
   useEffect(() => {
     loadVideos();
   }, []);
+
+  // Reset page if video list count changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [videos.length]);
+
+  // Pagination Calculations
+  const totalPages = Math.ceil(videos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedVideos = useMemo(() => {
+    return videos.slice(startIndex, endIndex);
+  }, [videos, startIndex, endIndex]);
+
+  // Helper for generating page numbers with dots (matching screenshot)
+  const getPaginationRange = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 4) {
+      return [1, 2, 3, 4, 5, '...', total];
+    }
+    if (current >= total - 3) {
+      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
 
   const handleSetPrimary = async (e: React.MouseEvent, videoId: string) => {
     e.stopPropagation();
@@ -104,15 +135,15 @@ export const VideoLibraryView: React.FC = () => {
           uploadDesc,
         );
       }
-      setShowUploadModal(false);
-      setUploadTitle('');
-      setUploadDesc('');
-      setUploadFile(null);
       await loadVideos();
     } catch (e) {
       console.error(e);
     } finally {
       setIsUploading(false);
+      setShowUploadModal(false);
+      setUploadTitle('');
+      setUploadDesc('');
+      setUploadFile(null);
     }
   };
 
@@ -153,7 +184,7 @@ export const VideoLibraryView: React.FC = () => {
 
       {/* Video Cards Grid */}
       <div className="video-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        {videos.map((video) => (
+        {paginatedVideos.map((video) => (
           <div
             key={video.id}
             className="video-card"
@@ -317,6 +348,135 @@ export const VideoLibraryView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Pills Control Bar (Matching Screenshot) */}
+      {videos.length > 0 && (
+        <div
+          className="glass-card"
+          style={{
+            marginTop: '1.8rem',
+            padding: '1rem 1.6rem',
+            borderRadius: '20px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          {/* Page Indicator (Left Side) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'rgba(99, 102, 241, 0.14)',
+                color: '#818cf8',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {currentPage}
+            </span>
+            <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              แสดง {startIndex + 1}-{Math.min(endIndex, videos.length)} จากทั้งหมด {videos.length} วิดีโอ (หน้า {currentPage}/{totalPages})
+            </span>
+          </div>
+
+          {/* Pills Button Controls (Right Side) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            {/* Previous Arrow Button */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: currentPage === 1 ? 'var(--border-card)' : 'var(--text-main)',
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="หน้าก่อนหน้า"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* Page Number Pills */}
+            {getPaginationRange(currentPage, totalPages).map((p, idx) => {
+              if (p === '...') {
+                return (
+                  <span key={`dots-${idx}`} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', padding: '0 0.25rem' }}>
+                    ...
+                  </span>
+                );
+              }
+
+              const isAct = currentPage === p;
+              return (
+                <button
+                  key={`page-${p}`}
+                  onClick={() => setCurrentPage(p as number)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    fontSize: '0.88rem',
+                    fontWeight: isAct ? 800 : 600,
+                    background: isAct
+                      ? 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)'
+                      : 'var(--bg-subtle)',
+                    color: isAct ? '#ffffff' : 'var(--text-main)',
+                    border: isAct ? 'none' : '1px solid var(--border-card)',
+                    boxShadow: isAct ? '0 4px 14px rgba(168, 85, 247, 0.4)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {p}
+                </button>
+              );
+            })}
+
+            {/* Next Arrow Button */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: currentPage === totalPages ? 'var(--border-card)' : 'var(--text-main)',
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="หน้าถัดไป"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Play Video Modal */}
       <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
