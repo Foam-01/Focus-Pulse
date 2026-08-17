@@ -146,10 +146,27 @@ export const TimerView: React.FC = () => {
     setSessionStatus('ครบกำหนดเวลาโฟกัสแล้ว! กำลังเปิดวิดีโอผ่อนคลาย...');
     playNotificationSound();
 
-    // Fetch primary reward video and open popup
-    const primaryVdo = await ApiService.getPrimaryVideo();
-    setRewardVideo(primaryVdo);
+    // 1. Open VideoModal IMMEDIATELY in 0ms using default video
+    const fallbackReward: VideoItem = {
+      id: 'vdo_ch',
+      title: 'วิดีโอผ่อนคลายความเครียดหลัก (Cozy Relaxation)',
+      category: 'ผ่อนคลายหลัก',
+      durationStr: 'HD High Quality',
+      src: '/Vdo/ch.mp4?v=105',
+      poster: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&q=80',
+      description: 'วิดีโอบรรยากาศผ่อนคลายหลักสำหรับเล่นเมื่อนาฬิกาจับเวลาโฟกัสทำงานเสร็จสิ้น',
+      isPrimary: true,
+    };
+    setRewardVideo(fallbackReward);
     setShowRewardModal(true);
+
+    // 2. Async fetch primary video in background to sync if user customized it
+    try {
+      const primaryVdo = await ApiService.getPrimaryVideo();
+      if (primaryVdo && primaryVdo.src) {
+        setRewardVideo(primaryVdo);
+      }
+    } catch (e) {}
   };
 
   // Called when user clicks "เสร็จสิ้นเซสชัน 1 รอบ" in the VideoModal
