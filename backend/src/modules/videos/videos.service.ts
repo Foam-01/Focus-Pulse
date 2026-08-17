@@ -31,7 +31,7 @@ export class VideosService implements OnModuleInit {
           title: 'วิดีโอผ่อนคลายความเครียดหลัก',
           category: 'ผ่อนคลายหลัก',
           durationStr: 'ความคมชัดสูง',
-          src: '/Vdo/ch.mp4?v=105',
+          src: '/Vdo/ch1.mp4?v=106',
           poster: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&q=80',
           description: 'วิดีโอบรรยากาศผ่อนคลายหลักสำหรับเปิดให้อัตโนมัติเมื่อจับเวลาทำงานเสร็จสิ้น',
           isPrimary: true,
