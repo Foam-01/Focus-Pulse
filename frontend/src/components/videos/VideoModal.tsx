@@ -106,6 +106,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
             <video
               controls
               autoPlay
+              muted
               loop
               preload="auto"
               playsInline
