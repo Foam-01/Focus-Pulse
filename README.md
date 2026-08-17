@@ -21,13 +21,20 @@
 - **Database & Auth**: Supabase Cloud PostgreSQL, Supabase Auth, TOTP 2FA
 
 ---
+<img width="1903" height="915" alt="image" src="https://github.com/user-attachments/assets/c514cc05-6e61-4ba9-97a7-d9d9e67c8f0a" />
+<img width="1909" height="901" alt="image" src="https://github.com/user-attachments/assets/7f215dc7-c7bc-4134-a240-9ad909be00e0" />
+<img width="1884" height="912" alt="image" src="https://github.com/user-attachments/assets/ff98acb4-f30d-45cb-be74-d6ab7b0b10b8" />
+<img width="1898" height="909" alt="image" src="https://github.com/user-attachments/assets/eaade417-77fa-4322-9b14-8678b9ca6f0e" />
+<img width="1907" height="898" alt="image" src="https://github.com/user-attachments/assets/5075c76f-fbde-47e2-a004-1b404f4f33e3" />
+
+<img width="1897" height="900" alt="image" src="https://github.com/user-attachments/assets/6faac9bb-a1f5-4242-a0e0-2c4eacc67620" />
+
 <img width="1893" height="663" alt="image" src="https://github.com/user-attachments/assets/fe0e6c1c-77dd-4a96-81b8-4231ba7595e8" />
 <img width="1907" height="907" alt="image" src="https://github.com/user-attachments/assets/083b8ca1-92fc-469e-bcef-aa6b242a8598" />
 <img width="1907" height="916" alt="image" src="https://github.com/user-attachments/assets/0953211c-52a6-4dfe-8faa-922ecdee3631" />
 <img width="1914" height="901" alt="image" src="https://github.com/user-attachments/assets/87d95df9-82f5-451a-ae58-aecb5d45f75f" />
 <img width="1905" height="917" alt="image" src="https://github.com/user-attachments/assets/1eeb151d-102b-48ae-92c2-a469c8afe95a" />
 <img width="1902" height="902" alt="image" src="https://github.com/user-attachments/assets/67834a84-fc11-4c73-bd01-945008b5099c" />
-
 <img width="1911" height="911" alt="image" src="https://github.com/user-attachments/assets/40ec4db4-7c08-49e5-b89e-a748c11cfada" />
 
 
