@@ -47,11 +47,16 @@ Includes customizable Pomodoro timer, executive analytics dashboard, dual-theme 
 <img width="1902" height="902" alt="image" src="https://github.com/user-attachments/assets/67834a84-fc11-4c73-bd01-945008b5099c" />
 <img width="1911" height="911" alt="image" src="https://github.com/user-attachments/assets/40ec4db4-7c08-49e5-b89e-a748c11cfada" />
 
-## 🔗 Demo & Repository
+## 🔗 Live Demo & Repository
 
-- **Live Demo (Frontend)**: [https://focus-pulse-mu.vercel.app](https://focus-pulse-mu.vercel.app)
-- **Production API (Backend)**: [https://focus-pulse.onrender.com](https://focus-pulse.onrender.com)
-- **GitHub Repository**: [https://github.com/Foam-01/Focus-Pulse](https://github.com/Foam-01/Focus-Pulse)
+- 🔴 **Live Demo (Frontend)**: https://focus-pulse-mu.vercel.app/
+- 🔴 **Production API (Backend)**: https://focus-pulse.onrender.com
+- 📦 **GitHub**: https://github.com/Foam-01/Focus-Pulse
+
+## 🔐 Test Accounts
+
+- **Username / Email**: `admin@gmail.com`
+- **Password**: `123456`
 
 ## 🏁 Getting Started
 
