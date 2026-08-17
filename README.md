@@ -21,11 +21,8 @@
 - **Database & Auth**: Supabase Cloud PostgreSQL, Supabase Auth, TOTP 2FA
 
 ---
-<img width="1903" height="915" alt="image" src="https://github.com/user-attachments/assets/c514cc05-6e61-4ba9-97a7-d9d9e67c8f0a" />
-<img width="1909" height="901" alt="image" src="https://github.com/user-attachments/assets/7f215dc7-c7bc-4134-a240-9ad909be00e0" />
-<img width="1884" height="912" alt="image" src="https://github.com/user-attachments/assets/ff98acb4-f30d-45cb-be74-d6ab7b0b10b8" />
-<img width="1898" height="909" alt="image" src="https://github.com/user-attachments/assets/eaade417-77fa-4322-9b14-8678b9ca6f0e" />
-<img width="1907" height="898" alt="image" src="https://github.com/user-attachments/assets/5075c76f-fbde-47e2-a004-1b404f4f33e3" />
+
+
 
 <img width="1897" height="900" alt="image" src="https://github.com/user-attachments/assets/6faac9bb-a1f5-4242-a0e0-2c4eacc67620" />
 
