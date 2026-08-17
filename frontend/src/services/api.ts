@@ -424,16 +424,9 @@ export const ApiService = {
       console.warn('Backend upload failed, creating object URL fallback.');
     }
 
-    // Safe Fallback when backend is offline:
-    // Assign a reliable HD video file from /Vdo/ asset folder to prevent expired Blob URLs
-    const fallbackList = [
-      '/Vdo/vdo-1786523233126-36793953.mp4',
-      '/Vdo/vdo-1786614431118-878150541.mp4',
-      '/Vdo/vdo-1786617878703-355897560.mp4',
-      '/Vdo/ch.mp4',
-    ];
-    const randomFallback = fallbackList[Math.floor(Math.random() * fallbackList.length)];
-    const fileUrl = randomFallback;
+    // Safe Fallback when backend is offline or on cloud frontend:
+    // Assign reliable HD video file from /Vdo/ asset folder to prevent expired Blob URLs
+    const fileUrl = '/Vdo/ch1.mp4?v=106';
 
     const newVideo: VideoItem = {
       id: 'vdo_' + Date.now(),

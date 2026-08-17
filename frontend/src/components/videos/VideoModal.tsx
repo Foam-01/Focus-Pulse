@@ -110,9 +110,15 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               loop
               preload="auto"
               playsInline
-              src={video.src}
+              src={(!video.src || video.src.startsWith('blob:')) ? '/Vdo/ch1.mp4?v=106' : video.src}
               poster={video.poster}
-              onError={() => setHasVideoError(true)}
+              onError={(e) => {
+                // Auto fallback to ch1.mp4 if local custom file fails
+                const target = e.currentTarget;
+                if (target.src !== window.location.origin + '/Vdo/ch1.mp4?v=106') {
+                  target.src = '/Vdo/ch1.mp4?v=106';
+                }
+              }}
               style={{
                 maxWidth: '85vw',
                 maxHeight: '65vh',
