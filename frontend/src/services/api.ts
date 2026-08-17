@@ -3,6 +3,19 @@ import { supabase } from '../lib/supabase';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://focus-pulse.onrender.com/api';
 
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 2500): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return res;
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const { data } = await supabase.auth.getUser();
@@ -22,7 +35,7 @@ export const ApiService = {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history`, { headers });
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history`, { headers });
       if (res.ok) {
         return await res.json();
       }
@@ -45,7 +58,7 @@ export const ApiService = {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/focus/history`, {
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history`, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -75,7 +88,7 @@ export const ApiService = {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history/${id}`, { method: 'DELETE', headers });
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history/${id}`, { method: 'DELETE', headers });
       if (res.ok) return true;
     } catch (e) {
       console.warn('Backend API unreachable, deleting from LocalStorage.');
@@ -91,7 +104,7 @@ export const ApiService = {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history/${id}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history/${id}`, {
         method: 'POST',
         headers,
         body: JSON.stringify(session),
@@ -123,7 +136,7 @@ export const ApiService = {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/history`, { method: 'DELETE', headers });
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history`, { method: 'DELETE', headers });
       if (res.ok) return true;
     } catch (e) {
       console.warn('Backend API unreachable, clearing LocalStorage.');
@@ -137,7 +150,7 @@ export const ApiService = {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetch(`${API_BASE}/focus/goal`, { headers });
+      const res = await fetchWithTimeout(`${API_BASE}/focus/goal`, { headers });
       if (res.ok) {
         const data = await res.json();
         return data.dailyGoalMinutes;
@@ -152,7 +165,7 @@ export const ApiService = {
     const userId = headers['x-user-id'];
     localStorage.setItem(`focus_daily_goal_${userId}`, String(dailyGoalMinutes));
     try {
-      const res = await fetch(`${API_BASE}/focus/goal`, {
+      const res = await fetchWithTimeout(`${API_BASE}/focus/goal`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ dailyGoalMinutes }),
@@ -169,7 +182,7 @@ export const ApiService = {
   async getAnalyticsSummary(timeframe: 'day' | 'week' | 'month' = 'day'): Promise<AnalyticsSummary> {
     const headers = await getAuthHeaders();
     try {
-      const res = await fetch(`${API_BASE}/analytics/summary?timeframe=${timeframe}`, { headers });
+      const res = await fetchWithTimeout(`${API_BASE}/analytics/summary?timeframe=${timeframe}`, { headers });
       if (res.ok) {
         return await res.json();
       }
@@ -272,7 +285,7 @@ export const ApiService = {
     let backendList: VideoItem[] = [];
 
     try {
-      const res = await fetch(`${API_BASE}/videos`);
+      const res = await fetchWithTimeout(`${API_BASE}/videos`);
       if (res.ok) {
         backendList = await res.json();
       }
@@ -349,7 +362,7 @@ export const ApiService = {
 
   async getPrimaryVideo(): Promise<VideoItem> {
     try {
-      const res = await fetch(`${API_BASE}/videos/primary`);
+      const res = await fetchWithTimeout(`${API_BASE}/videos/primary`);
       if (res.ok) {
         return await res.json();
       }
@@ -362,7 +375,7 @@ export const ApiService = {
 
   async setPrimaryVideo(id: string): Promise<VideoItem> {
     try {
-      const res = await fetch(`${API_BASE}/videos/primary`, {
+      const res = await fetchWithTimeout(`${API_BASE}/videos/primary`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
@@ -388,10 +401,10 @@ export const ApiService = {
       if (category) formData.append('category', category);
       if (description) formData.append('description', description);
 
-      const res = await fetch(`${API_BASE}/videos/upload`, {
+      const res = await fetchWithTimeout(`${API_BASE}/videos/upload`, {
         method: 'POST',
         body: formData,
-      });
+      }, 5000);
       if (res.ok) {
         return await res.json();
       }
@@ -434,7 +447,7 @@ export const ApiService = {
 
   async updateVideo(id: string, updates: Partial<VideoItem>): Promise<VideoItem> {
     try {
-      const res = await fetch(`${API_BASE}/videos/${id}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/videos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -466,7 +479,7 @@ export const ApiService = {
 
   async deleteVideo(id: string): Promise<boolean> {
     try {
-      await fetch(`${API_BASE}/videos/${id}`, { method: 'DELETE' });
+      await fetchWithTimeout(`${API_BASE}/videos/${id}`, { method: 'DELETE' });
     } catch (e) {}
 
     // Persist deletion in localStorage deleted_video_ids

@@ -107,6 +107,8 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               controls
               autoPlay
               loop
+              preload="auto"
+              playsInline
               src={video.src}
               poster={video.poster}
               onError={() => setHasVideoError(true)}
