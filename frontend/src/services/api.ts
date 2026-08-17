@@ -347,10 +347,15 @@ export const ApiService = {
     const overrides: Record<string, Partial<VideoItem>> = overridesStr ? JSON.parse(overridesStr) : {};
 
     const combined = Array.from(combinedMap.values()).map((v) => {
+      let item = v;
       if (overrides[v.id]) {
-        return { ...v, ...overrides[v.id] };
+        item = { ...v, ...overrides[v.id] };
       }
-      return v;
+      // Auto-repair any expired blob: URLs
+      if (!item.src || item.src.startsWith('blob:')) {
+        item = { ...item, src: '/Vdo/ch1.mp4?v=106' };
+      }
+      return item;
     });
 
     const primaryId = localStorage.getItem('primary_video_id') || 'vdo_ch';
@@ -364,13 +369,20 @@ export const ApiService = {
     try {
       const res = await fetchWithTimeout(`${API_BASE}/videos/primary`);
       if (res.ok) {
-        return await res.json();
+        const v = await res.json();
+        if (v && v.src && !v.src.startsWith('blob:')) {
+          return v;
+        }
       }
     } catch (e) {}
 
     const videos = await this.getVideos();
     const primary = videos.find((v) => v.isPrimary);
-    return primary || videos[0];
+    const result = primary || videos[0];
+    if (!result.src || result.src.startsWith('blob:')) {
+      result.src = '/Vdo/ch1.mp4?v=106';
+    }
+    return result;
   },
 
   async setPrimaryVideo(id: string): Promise<VideoItem> {

@@ -163,7 +163,7 @@ export const TimerView: React.FC = () => {
     // 2. Async fetch primary video in background to sync if user customized it
     try {
       const primaryVdo = await ApiService.getPrimaryVideo();
-      if (primaryVdo && primaryVdo.src) {
+      if (primaryVdo && primaryVdo.src && !primaryVdo.src.startsWith('blob:')) {
         setRewardVideo(primaryVdo);
       }
     } catch (e) {}
