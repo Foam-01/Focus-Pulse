@@ -146,7 +146,7 @@ export const TimerView: React.FC = () => {
     setSessionStatus('ครบกำหนดเวลาโฟกัสแล้ว! กำลังเปิดวิดีโอผ่อนคลาย...');
     playNotificationSound();
 
-    // 1. Open VideoModal IMMEDIATELY in 0ms using default video
+    // 1. Open VideoModal IMMEDIATELY in 0ms using primary video ch1.mp4
     const fallbackReward: VideoItem = {
       id: 'vdo_ch',
       title: 'วิดีโอผ่อนคลายความเครียดหลัก (Cozy Relaxation)',
@@ -159,14 +159,6 @@ export const TimerView: React.FC = () => {
     };
     setRewardVideo(fallbackReward);
     setShowRewardModal(true);
-
-    // 2. Async fetch primary video in background to sync if user customized it
-    try {
-      const primaryVdo = await ApiService.getPrimaryVideo();
-      if (primaryVdo && primaryVdo.src && !primaryVdo.src.startsWith('blob:')) {
-        setRewardVideo(primaryVdo);
-      }
-    } catch (e) {}
   };
 
   // Called when user clicks "เสร็จสิ้นเซสชัน 1 รอบ" in the VideoModal
