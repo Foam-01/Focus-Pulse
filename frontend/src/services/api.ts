@@ -1,7 +1,7 @@
 import { FocusSessionRecord, AnalyticsSummary, VideoItem } from '../types';
 import { supabase } from '../lib/supabase';
 
-const API_BASE = '/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://focus-pulse.onrender.com/api';
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
