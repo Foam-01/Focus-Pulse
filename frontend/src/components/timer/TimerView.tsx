@@ -47,10 +47,16 @@ export const TimerView: React.FC = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const loadData = async () => {
-    const summary = await ApiService.getAnalyticsSummary('day');
+    // B-1: Run both requests in parallel — eliminates sequential waterfall latency
+    // Previously: Analytics(~300ms) + History(~300ms) = ~600ms total
+    // Now: max(Analytics, History) ≈ ~300ms total
+    const [summary, historyList] = await Promise.all([
+      ApiService.getAnalyticsSummary('day'),
+      ApiService.getHistory(),
+    ]);
     setAnalytics(summary);
-    const historyList = await ApiService.getHistory();
     setRecentHistory(historyList.slice(0, 5));
+
   };
 
   const handleOpenAddHistory = () => {
@@ -617,25 +623,25 @@ export const TimerView: React.FC = () => {
 
         {/* MIDDLE SECTION: ประวัติการลุยงานล่าสุด */}
         <div style={{ paddingTop: '1.2rem', borderTop: '1px solid var(--border-card)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
-            <div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.8rem', marginBottom: '0.9rem' }}>
+            <div style={{ flex: '1 1 220px', minWidth: 0 }}>
               <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
                 ประวัติการโฟกัสล่าสุด
               </h3>
-              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                รายการรอบการทำงานที่ทำเสร็จล่าสุดเพื่อติดตามความต่อเนื่อง
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>
+                รอบที่ทำเสร็จล่าสุด ติดตามความต่อเนื่อง
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
               <button
                 className="btn-primary-gradient"
                 onClick={handleOpenAddHistory}
-                style={{ padding: '0.4rem 0.85rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                style={{ padding: '0.4rem 0.85rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}
               >
                 <Plus size={15} /> เพิ่มประวัติ
               </button>
-              <span style={{ fontSize: '0.82rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.4rem 0.75rem', borderRadius: '10px', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.82rem', color: 'var(--blue-sky)', background: 'var(--bg-subtle)', padding: '0.4rem 0.75rem', borderRadius: '10px', fontWeight: 700, whiteSpace: 'nowrap' }}>
                 {recentHistory.length} รอบล่าสุด
               </span>
             </div>
@@ -667,30 +673,32 @@ export const TimerView: React.FC = () => {
                         <span style={{ color: 'var(--blue-sky)', fontWeight: 700 }}>{item.duration} นาที</span>
                       </td>
                       <td>
-                        <span style={{ background: 'var(--bg-subtle)', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        <span style={{ display: 'inline-block', background: 'var(--bg-subtle)', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                           {item.tag || 'โฟกัสทั่วไป'}
                         </span>
                       </td>
                       <td>
-                        <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.82rem' }}>
+                        <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
                           <CheckCircle2 size={14} /> สำเร็จ 1 รอบ
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.35rem', justifyContent: 'flex-end', whiteSpace: 'nowrap' }}>
                           <button
                             onClick={() => handleOpenEditHistory(item)}
-                            style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--blue-sky)', padding: '0.3rem 0.55rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.78rem', fontWeight: 600 }}
+                            style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-card)', color: 'var(--blue-sky)', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                             title="แก้ไขรายการนี้"
+                            aria-label="แก้ไขรายการนี้"
                           >
-                            <Pencil size={13} /> แก้ไข
+                            <Pencil size={14} />
                           </button>
                           <button
                             onClick={() => setDeletingHistoryId(item.id)}
-                            style={{ background: 'rgba(244, 63, 94, 0.08)', border: '1px solid rgba(244, 63, 94, 0.2)', color: '#f43f5e', padding: '0.3rem 0.55rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.78rem', fontWeight: 600 }}
+                            style={{ background: 'rgba(244, 63, 94, 0.08)', border: '1px solid rgba(244, 63, 94, 0.2)', color: '#f43f5e', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                             title="ลบรายการนี้"
+                            aria-label="ลบรายการนี้"
                           >
-                            <Trash2 size={13} /> ลบ
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

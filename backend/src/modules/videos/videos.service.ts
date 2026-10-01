@@ -18,6 +18,14 @@ export interface VideoItem {
 export class VideosService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Short-TTL in-memory cache for getAllVideos(), invalidated on any mutation below.
+  private videosCache: { data: VideoItem[]; expiresAt: number } | null = null;
+  private readonly VIDEOS_CACHE_TTL_MS = 30_000;
+
+  private invalidateVideosCache(): void {
+    this.videosCache = null;
+  }
+
   async onModuleInit() {
     await this.seedDefaultVideo();
   }
@@ -41,6 +49,10 @@ export class VideosService implements OnModuleInit {
   }
 
   async getAllVideos(): Promise<VideoItem[]> {
+    if (this.videosCache && this.videosCache.expiresAt > Date.now()) {
+      return this.videosCache.data;
+    }
+
     const list = await this.prisma.videoItem.findMany({
       orderBy: { createdAt: 'desc' },
     });
@@ -48,7 +60,7 @@ export class VideosService implements OnModuleInit {
     // Ensure primary video is sorted to position #1
     const sorted = list.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
 
-    return sorted.map((v) => ({
+    const result = sorted.map((v) => ({
       id: v.id,
       title: v.title,
       category: v.category,
@@ -58,6 +70,9 @@ export class VideosService implements OnModuleInit {
       description: v.description,
       isPrimary: v.isPrimary,
     }));
+
+    this.videosCache = { data: result, expiresAt: Date.now() + this.VIDEOS_CACHE_TTL_MS };
+    return result;
   }
 
   async getVideoById(id: string): Promise<VideoItem | null> {
@@ -121,6 +136,7 @@ export class VideosService implements OnModuleInit {
 
   async setPrimaryVideo(id: string): Promise<VideoItem | null> {
     await this.prisma.videoItem.updateMany({
+      where: { isPrimary: true },
       data: { isPrimary: false },
     });
 
@@ -128,6 +144,8 @@ export class VideosService implements OnModuleInit {
       where: { id },
       data: { isPrimary: true },
     });
+
+    this.invalidateVideosCache();
 
     return {
       id: updated.id,
@@ -153,6 +171,8 @@ export class VideosService implements OnModuleInit {
         isPrimary: false,
       },
     });
+
+    this.invalidateVideosCache();
 
     return {
       id: created.id,
@@ -180,6 +200,8 @@ export class VideosService implements OnModuleInit {
           ...(updates.isPrimary !== undefined && { isPrimary: updates.isPrimary }),
         },
       });
+
+      this.invalidateVideosCache();
 
       return {
         id: updated.id,
@@ -226,6 +248,7 @@ export class VideosService implements OnModuleInit {
           });
         }
       }
+      this.invalidateVideosCache();
       return true;
     } catch {
       return false;

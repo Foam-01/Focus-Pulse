@@ -5,6 +5,7 @@ import { VideoItem } from '../../types';
 import { ApiService } from '../../services/api';
 import { VideoModal } from './VideoModal';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { PageHeader } from '../shared/PageHeader';
 import { Play, Star, Upload, Check, Trash2, Pencil, Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const VideoLibraryView: React.FC = () => {
@@ -150,37 +151,23 @@ export const VideoLibraryView: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       {/* Header Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.8rem',
-        }}
-      >
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> คลังวิดีโอพักสายตา
-          </div>
-          <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            คลังวิดีโอผ่อนคลาย
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            เล่นวิดีโอหลักให้อัตโนมัติเมื่อหมดเวลาโฟกัส
-          </p>
-        </div>
-
-        <button
-          className="btn-primary-gradient"
-          onClick={() => setShowUploadModal(true)}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.4rem', borderRadius: '14px', fontWeight: 700 }}
-        >
-          <Upload size={18} />
-          <span>เพิ่มวิดีโอ</span>
-        </button>
-      </div>
+      <PageHeader
+        style={{ marginBottom: '1.8rem' }}
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="คลังวิดีโอพักสายตา"
+        title="คลังวิดีโอผ่อนคลาย"
+        description="เล่นวิดีโอหลักให้อัตโนมัติเมื่อหมดเวลาโฟกัส"
+        actions={
+          <button
+            className="btn-primary-gradient"
+            onClick={() => setShowUploadModal(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.4rem', borderRadius: '14px', fontWeight: 700 }}
+          >
+            <Upload size={18} />
+            <span>เพิ่มวิดีโอ</span>
+          </button>
+        }
+      />
 
       {/* Video Cards Grid */}
       <div className="video-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -208,7 +195,7 @@ export const VideoLibraryView: React.FC = () => {
                 {video.src ? (
                   <video
                     src={`${video.src}#t=0.5`}
-                    preload="metadata"
+                    preload="none"
                     muted
                     playsInline
                     style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}

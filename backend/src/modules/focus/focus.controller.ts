@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   Headers,
   HttpCode,
   HttpStatus,
@@ -22,17 +23,44 @@ export class FocusController {
 
   @Get('history')
   @ApiOperation({ summary: 'Get user focus history records' })
-  async getHistory(@Headers('x-user-id') userId?: string): Promise<FocusSessionRecord[]> {
-    return await this.focusService.getHistory(userId);
+  async getHistory(
+    @Headers('x-user-id') userId?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('tag') tag?: string,
+    @Query('search') search?: string,
+  ): Promise<FocusSessionRecord[]> {
+    // page/pageSize/tag/search are all OPTIONAL — omitting them preserves the
+    // original unbounded, unfiltered response exactly as before.
+    const pageNum = page !== undefined ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize !== undefined ? parseInt(pageSize, 10) : undefined;
+    return await this.focusService.getHistory(
+      userId,
+      Number.isFinite(pageNum) ? pageNum : undefined,
+      Number.isFinite(pageSizeNum) ? pageSizeNum : undefined,
+      tag,
+      search,
+    );
+  }
+
+  @Get('history/stats')
+  @ApiOperation({ summary: 'Get aggregate focus history stats (count/sum/per-tag) without downloading all rows' })
+  async getHistoryStats(
+    @Headers('x-user-id') userId?: string,
+    @Query('tag') tag?: string,
+    @Query('search') search?: string,
+  ) {
+    return await this.focusService.getHistoryStats(userId, tag, search);
   }
 
   @Post('history')
   @ApiOperation({ summary: 'Create new focus session record' })
   async createSession(
     @Headers('x-user-id') userId: string,
+    @Headers('x-user-email') userEmail: string,
     @Body() dto: CreateSessionDto,
   ): Promise<FocusSessionRecord> {
-    return await this.focusService.createSession(dto, userId);
+    return await this.focusService.createSession(dto, userId, userEmail);
   }
 
   @Delete('history/:id')
@@ -71,8 +99,12 @@ export class FocusController {
   }
 
   @Post('goal')
-  async updateDailyGoal(@Headers('x-user-id') userId: string, @Body() dto: UpdateGoalDto) {
-    const updated = await this.focusService.updateDailyGoal(dto, userId);
+  async updateDailyGoal(
+    @Headers('x-user-id') userId: string,
+    @Headers('x-user-email') userEmail: string,
+    @Body() dto: UpdateGoalDto,
+  ) {
+    const updated = await this.focusService.updateDailyGoal(dto, userId, userEmail);
     return { dailyGoalMinutes: updated };
   }
 }

@@ -42,9 +42,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user, onOpenAu
   const userDisplayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'ผู้ใช้งาน';
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
     setDropdownOpen(false);
-    window.location.reload();
+    await supabase.auth.signOut();
   };
 
   return (

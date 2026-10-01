@@ -37,7 +37,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           background: 'var(--bg-card)',
           border: '1px solid var(--border-card)',
           borderRadius: '24px',
-          padding: '2rem 1.8rem',
+          padding: '2rem 2.2rem',
           position: 'relative',
           boxShadow: 'var(--shadow-lg)',
           animation: 'fadeInUp 0.25s ease',
@@ -48,21 +48,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onCancel}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            background: 'var(--bg-subtle)',
-            border: '1px solid var(--border-card)',
-            color: 'var(--text-main)',
-            borderRadius: '12px',
-            width: '32px',
-            height: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
+          className="icon-btn-close"
+          style={{ position: 'absolute', top: '1rem', right: '1rem' }}
         >
           <X size={16} />
         </button>

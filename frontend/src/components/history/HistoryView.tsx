@@ -4,10 +4,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FocusSessionRecord } from '../../types';
 import { ApiService } from '../../services/api';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { getPaginationRange } from '../../utils/pagination';
+import { PageHeader } from '../shared/PageHeader';
+import { FilterBar, FilterBarButton } from '../shared/FilterBar';
 import { History, Search, Plus, Trash2, Pencil, Calendar, Clock, Tag, Sparkles, Filter, RotateCcw, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const HistoryView: React.FC = () => {
-  const [historyList, setHistoryList] = useState<FocusSessionRecord[]>([]);
+  // Server-paginated/filtered data: only the CURRENT page's rows are ever
+  // downloaded (instead of the full history list), keeping displayed numbers
+  // and behavior identical to the previous full-client-side-compute version.
+  const [pageItems, setPageItems] = useState<FocusSessionRecord[]>([]);
+  const [overallStats, setOverallStats] = useState<{ totalCount: number; totalMinutes: number; tagCounts: Record<string, number> }>({
+    totalCount: 0,
+    totalMinutes: 0,
+    tagCounts: {},
+  });
+  const [filteredCount, setFilteredCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -28,12 +40,32 @@ export const HistoryView: React.FC = () => {
   const [formDate, setFormDate] = useState<string>(new Date().toLocaleDateString('sv-SE'));
   const [formTime, setFormTime] = useState<string>(new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false }));
 
-  // Load history from ApiService
-  const loadHistory = async () => {
+  // Overall aggregate stats (totals/per-tag counts) are always computed over
+  // the FULL unfiltered dataset server-side, independent of search/tag — this
+  // matches the previous behavior where these numbers came from the full
+  // in-memory historyList rather than the filtered view.
+  const loadOverallStats = async () => {
+    try {
+      const data = await ApiService.getHistoryStats();
+      setOverallStats(data);
+    } catch (e) {
+      console.error('Failed to load focus history stats', e);
+    }
+  };
+
+  // Current page's rows plus the matching (filtered) total count, both fetched
+  // server-side for the active search term / tag filter and page number.
+  const loadPage = async () => {
     setLoading(true);
     try {
-      const data = await ApiService.getHistory();
-      setHistoryList(data);
+      const tagParam = selectedTag !== 'all' ? selectedTag : undefined;
+      const searchParam = searchTerm ? searchTerm : undefined;
+      const [items, filteredStats] = await Promise.all([
+        ApiService.getHistory(currentPage, itemsPerPage, tagParam, searchParam),
+        ApiService.getHistoryStats(tagParam, searchParam),
+      ]);
+      setPageItems(items);
+      setFilteredCount(filteredStats.totalCount);
     } catch (e) {
       console.error('Failed to load focus history', e);
     } finally {
@@ -41,60 +73,43 @@ export const HistoryView: React.FC = () => {
     }
   };
 
+  const refreshAll = async () => {
+    await Promise.all([loadOverallStats(), loadPage()]);
+  };
+
   useEffect(() => {
-    loadHistory();
+    loadOverallStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Filter & Search logic
-  const filteredHistory = useMemo(() => {
-    return historyList.filter((item) => {
-      const matchesSearch =
-        item.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.date.includes(searchTerm) ||
-        item.time.includes(searchTerm);
-
-      const matchesTag = selectedTag === 'all' || item.tag === selectedTag;
-
-      return matchesSearch && matchesTag;
-    });
-  }, [historyList, searchTerm, selectedTag]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedTag]);
 
+  useEffect(() => {
+    loadPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchTerm, selectedTag]);
+
   // Pagination calculations
-  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredCount / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedHistory = useMemo(() => {
-    return filteredHistory.slice(startIndex, endIndex);
-  }, [filteredHistory, startIndex, endIndex]);
+  const paginatedHistory = pageItems;
 
-  // Helper for generating page numbers with dots (matching screenshot)
-  const getPaginationRange = (current: number, total: number) => {
-    if (total <= 7) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
-    if (current <= 4) {
-      return [1, 2, 3, 4, 5, '...', total];
-    }
-    if (current >= total - 3) {
-      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-    }
-    return [1, '...', current - 1, current, current + 1, '...', total];
-  };
+  // Helper for generating page numbers with dots (via shared util)
+  // See: src/utils/pagination.ts
 
-  // Overall Statistics Summary
+  // Overall Statistics Summary (derived from server-computed aggregate stats)
   const stats = useMemo(() => {
-    const totalCount = historyList.length;
-    const totalMinutes = historyList.reduce((acc, curr) => acc + curr.duration, 0);
+    const totalCount = overallStats.totalCount;
+    const totalMinutes = overallStats.totalMinutes;
     const totalHours = (totalMinutes / 60).toFixed(1).replace('.0', '');
     const avgMinutes = totalCount > 0 ? Math.round(totalMinutes / totalCount) : 0;
 
     return { totalCount, totalMinutes, totalHours, avgMinutes };
-  }, [historyList]);
+  }, [overallStats]);
 
   // Tag options
   const tagOptions = ['โฟกัสงาน', 'อ่านหนังสือ', 'ออกกำลังกาย', 'อื่นๆ'];
@@ -117,7 +132,7 @@ export const HistoryView: React.FC = () => {
       time: formTime,
     });
     setShowAddModal(false);
-    loadHistory();
+    refreshAll();
   };
 
   // Edit Session Handler
@@ -139,7 +154,7 @@ export const HistoryView: React.FC = () => {
         time: formTime,
       });
       setEditingRecord(null);
-      loadHistory();
+      refreshAll();
     }
   };
 
@@ -148,7 +163,7 @@ export const HistoryView: React.FC = () => {
     if (deletingId) {
       await ApiService.deleteSession(deletingId);
       setDeletingId(null);
-      loadHistory();
+      refreshAll();
     }
   };
 
@@ -156,86 +171,71 @@ export const HistoryView: React.FC = () => {
   const handleConfirmClearAll = async () => {
     await ApiService.resetAllHistory();
     setShowClearAllConfirm(false);
-    loadHistory();
+    refreshAll();
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
       {/* Top Title & Header Actions Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '0.4rem',
-        }}
-      >
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> ประวัติการโฟกัสย้อนหลัง
-          </div>
-          <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-            ประวัติการโฟกัส ({historyList.length} รายการ)
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500, margin: '0.2rem 0 0 0' }}>
-            ตรวจสอบ ค้นหา และจัดการประวัติการโฟกัสย้อนหลัง
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            className="btn-primary-gradient"
-            onClick={handleOpenAdd}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1.4rem',
-              borderRadius: '14px',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-            }}
-          >
-            <Plus size={18} />
-            <span>เพิ่มประวัติ</span>
-          </button>
-
-          {historyList.length > 0 && (
+      <PageHeader
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="ประวัติการโฟกัสย้อนหลัง"
+        title={`ประวัติการโฟกัส (${overallStats.totalCount} รายการ)`}
+        description="ตรวจสอบ ค้นหา และจัดการประวัติการโฟกัสย้อนหลัง"
+        actions={
+          <>
             <button
-              onClick={() => setShowClearAllConfirm(true)}
+              className="btn-primary-gradient"
+              onClick={handleOpenAdd}
               style={{
-                background: 'var(--bg-subtle)',
-                border: '1px solid var(--border-card)',
-                color: '#f43f5e',
-                padding: '0.75rem 1.3rem',
-                borderRadius: '14px',
-                fontSize: '0.88rem',
-                fontWeight: 700,
-                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)';
-                e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--bg-subtle)';
-                e.currentTarget.style.borderColor = 'var(--border-card)';
+                gap: '0.5rem',
+                padding: '0.75rem 1.4rem',
+                borderRadius: '14px',
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                cursor: 'pointer',
               }}
             >
-              <Trash2 size={16} />
-              <span>ลบประวัติทั้งหมด</span>
+              <Plus size={18} />
+              <span>เพิ่มประวัติ</span>
             </button>
-          )}
-        </div>
-      </div>
+
+            {overallStats.totalCount > 0 && (
+              <button
+                onClick={() => setShowClearAllConfirm(true)}
+                style={{
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-card)',
+                  color: '#f43f5e',
+                  padding: '0.75rem 1.3rem',
+                  borderRadius: '14px',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)';
+                  e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--bg-subtle)';
+                  e.currentTarget.style.borderColor = 'var(--border-card)';
+                }}
+              >
+                <Trash2 size={16} />
+                <span>ลบประวัติทั้งหมด</span>
+              </button>
+            )}
+          </>
+        }
+      />
 
       {/* KPI Stats Overview Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem' }}>
@@ -243,7 +243,7 @@ export const HistoryView: React.FC = () => {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>
             รอบโฟกัสทั้งหมด
           </span>
-          <strong style={{ fontSize: '1.6rem', color: 'var(--text-main)', fontWeight: 900 }}>
+          <strong style={{ fontSize: '1.6rem', color: 'var(--text-main)', fontWeight: 800 }}>
             {stats.totalCount.toLocaleString('th-TH')} <span style={{ fontSize: '0.9rem', color: 'var(--blue-sky)', fontWeight: 700 }}>รอบ</span>
           </strong>
         </div>
@@ -252,7 +252,7 @@ export const HistoryView: React.FC = () => {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>
             เวลารวมสะสม
           </span>
-          <strong style={{ fontSize: '1.6rem', color: 'var(--text-main)', fontWeight: 900 }}>
+          <strong style={{ fontSize: '1.6rem', color: 'var(--text-main)', fontWeight: 800 }}>
             {stats.totalMinutes.toLocaleString('th-TH')} <span style={{ fontSize: '0.9rem', color: 'var(--blue-sky)', fontWeight: 700 }}>นาที ({stats.totalHours} ชม.)</span>
           </strong>
         </div>
@@ -261,49 +261,37 @@ export const HistoryView: React.FC = () => {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>
             เฉลี่ยต่อรอบ
           </span>
-          <strong style={{ fontSize: '1.6rem', color: '#34d399', fontWeight: 900 }}>
+          <strong style={{ fontSize: '1.6rem', color: '#34d399', fontWeight: 800 }}>
             {stats.avgMinutes.toLocaleString('th-TH')} <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>นาที/รอบ</span>
           </strong>
         </div>
       </div>
 
       {/* Filter & Search Bar Toolbar */}
-      <div
-        className="glass-card"
-        style={{
-          padding: '1.1rem 1.4rem',
-          borderRadius: '18px',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-card)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
+      <FilterBar>
         {/* Search Keyword Input */}
         <div style={{ position: 'relative', flex: '1 1 280px', minWidth: '240px' }}>
           <Search size={17} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <label htmlFor="history-search" className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
+            ค้นหาประวัติ
+          </label>
           <input
+            id="history-search"
             type="text"
             placeholder="ค้นหาตามวันที่ เวลา หรือหมวดหมู่..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="app-input-inline"
+            aria-label="ค้นหาประวัติตามวันที่ เวลา หรือหมวดหมู่"
             style={{
               width: '100%',
               padding: '0.65rem 1rem 0.65rem 2.6rem',
-              borderRadius: '12px',
-              border: '1px solid var(--border-card)',
-              background: 'var(--bg-subtle)',
-              color: 'var(--text-main)',
-              fontSize: '0.88rem',
-              outline: 'none',
             }}
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
+              aria-label="ล้างการค้นหา"
               style={{
                 position: 'absolute',
                 right: '12px',
@@ -325,58 +313,25 @@ export const HistoryView: React.FC = () => {
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <Filter size={15} /> หมวดหมู่:
           </span>
-          <button
-            onClick={() => setSelectedTag('all')}
-            style={{
-              padding: '0.45rem 0.95rem',
-              borderRadius: '10px',
-              fontSize: '0.82rem',
-              fontWeight: selectedTag === 'all' ? 700 : 500,
-              background: selectedTag === 'all'
-                ? 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)'
-                : 'var(--bg-subtle)',
-              color: selectedTag === 'all' ? '#ffffff' : 'var(--text-muted)',
-              border: selectedTag === 'all' ? 'none' : '1px solid var(--border-card)',
-              boxShadow: selectedTag === 'all' ? '0 4px 12px rgba(168, 85, 247, 0.35)' : 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            ทั้งหมด ({historyList.length})
-          </button>
+          <FilterBarButton active={selectedTag === 'all'} onClick={() => setSelectedTag('all')}>
+            ทั้งหมด ({overallStats.totalCount})
+          </FilterBarButton>
           {tagOptions.map((tag) => {
-            const count = historyList.filter((h) => h.tag === tag).length;
+            const count = overallStats.tagCounts[tag] || 0;
             const isSel = selectedTag === tag;
             return (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                style={{
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  fontWeight: isSel ? 700 : 500,
-                  background: isSel
-                    ? 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)'
-                    : 'var(--bg-subtle)',
-                  color: isSel ? '#ffffff' : 'var(--text-muted)',
-                  border: isSel ? 'none' : '1px solid var(--border-card)',
-                  boxShadow: isSel ? '0 4px 12px rgba(168, 85, 247, 0.35)' : 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
+              <FilterBarButton key={tag} active={isSel} onClick={() => setSelectedTag(tag)}>
                 {tag} ({count})
-              </button>
+              </FilterBarButton>
             );
           })}
         </div>
-      </div>
+      </FilterBar>
 
       {/* History Items List Section */}
       {loading ? (
         <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>กำลังโหลดประวัติ...</div>
-      ) : filteredHistory.length === 0 ? (
+      ) : filteredCount === 0 ? (
         <div
           className="glass-card"
           style={{
@@ -402,22 +357,16 @@ export const HistoryView: React.FC = () => {
           {paginatedHistory.map((item) => (
             <div
               key={item.id}
-              className="glass-card"
+              className="glass-card history-card-body"
               style={{
-                padding: '1.2rem 1.6rem',
+                padding: '1rem 1.4rem',
                 borderRadius: '18px',
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border-card)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                transition: 'all 0.2s ease',
               }}
             >
               {/* Left Info Column */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
                 {/* Category Icon Badge */}
                 <div
                   style={{
@@ -445,12 +394,13 @@ export const HistoryView: React.FC = () => {
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}
+                  aria-hidden="true"
                 >
                   <Tag size={20} />
                 </div>
 
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <span
                       style={{
                         fontSize: '0.78rem',
@@ -465,17 +415,17 @@ export const HistoryView: React.FC = () => {
                       {item.tag}
                     </span>
                     <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <Calendar size={13} /> {item.date}
+                      <Calendar size={13} aria-hidden="true" /> {item.date}
                     </span>
                     <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <Clock size={13} /> {item.time} น.
+                      <Clock size={13} aria-hidden="true" /> {item.time} น.
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Right Duration & Actions Column */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.4rem' }}>
+              <div className="history-card-right">
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1 }}>
                     {item.duration} นาที
@@ -489,42 +439,18 @@ export const HistoryView: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <button
                     onClick={() => handleOpenEdit(item)}
-                    style={{
-                      background: 'var(--bg-subtle)',
-                      border: '1px solid var(--border-card)',
-                      color: 'var(--text-muted)',
-                      borderRadius: '10px',
-                      width: '34px',
-                      height: '34px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#3b82f6')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    className="icon-btn-action"
                     title="แก้ไขรายการ"
+                    aria-label={`แก้ไขรายการ ${item.tag} วันที่ ${item.date}`}
                   >
                     <Pencil size={15} />
                   </button>
 
                   <button
                     onClick={() => setDeletingId(item.id)}
-                    style={{
-                      background: 'rgba(244, 63, 94, 0.08)',
-                      border: '1px solid rgba(244, 63, 94, 0.2)',
-                      color: '#f43f5e',
-                      borderRadius: '10px',
-                      width: '34px',
-                      height: '34px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
+                    className="icon-btn-danger"
                     title="ลบรายการนี้"
+                    aria-label={`ลบรายการ ${item.tag} วันที่ ${item.date}`}
                   >
                     <Trash2 size={15} />
                   </button>
@@ -570,7 +496,7 @@ export const HistoryView: React.FC = () => {
                   {currentPage}
                 </span>
                 <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                  แสดง {startIndex + 1}-{Math.min(endIndex, filteredHistory.length)} จากทั้งหมด {filteredHistory.length} รายการ (หน้า {currentPage}/{totalPages})
+                  แสดง {startIndex + 1}-{Math.min(endIndex, filteredCount)} จากทั้งหมด {filteredCount} รายการ (หน้า {currentPage}/{totalPages})
                 </span>
               </div>
 
@@ -580,6 +506,8 @@ export const HistoryView: React.FC = () => {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
+                  aria-label="หน้าก่อนหน้า"
+                  aria-disabled={currentPage === 1}
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -602,7 +530,7 @@ export const HistoryView: React.FC = () => {
                 {getPaginationRange(currentPage, totalPages).map((p, idx) => {
                   if (p === '...') {
                     return (
-                      <span key={`dots-${idx}`} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', padding: '0 0.25rem' }}>
+                      <span key={`dots-${idx}`} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', padding: '0 0.25rem' }} aria-hidden="true">
                         ...
                       </span>
                     );
@@ -613,6 +541,8 @@ export const HistoryView: React.FC = () => {
                     <button
                       key={`page-${p}`}
                       onClick={() => setCurrentPage(p as number)}
+                      aria-label={`หน้า ${p}`}
+                      aria-current={isAct ? 'page' : undefined}
                       style={{
                         width: '36px',
                         height: '36px',
@@ -641,6 +571,8 @@ export const HistoryView: React.FC = () => {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
+                  aria-label="หน้าถัดไป"
+                  aria-disabled={currentPage === totalPages}
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -669,39 +601,49 @@ export const HistoryView: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div
             className="modal-content-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-modal-title"
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: '440px', padding: '1.8rem' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Plus size={18} style={{ color: '#3b82f6' }} /> เพิ่มประวัติโฟกัสใหม่
+              <h3 id="add-modal-title" style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Plus size={18} style={{ color: '#3b82f6' }} aria-hidden="true" /> เพิ่มประวัติโฟกัสใหม่
               </h3>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button
+                onClick={() => setShowAddModal(false)}
+                aria-label="ปิดหน้าต่างเพิ่มประวัติ"
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSaveAdd} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label htmlFor="add-duration" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                   ระยะเวลาโฟกัส (นาที):
                 </label>
                 <input
+                  id="add-duration"
                   type="number"
                   min="1"
                   max="1440"
                   value={formDuration}
                   onChange={(e) => setFormDuration(Number(e.target.value))}
                   required
+                  autoFocus
                   style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border-card)', background: 'var(--bg-subtle)', color: 'var(--text-main)', fontSize: '0.95rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label htmlFor="add-tag" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                   หมวดหมู่:
                 </label>
                 <select
+                  id="add-tag"
                   value={formTag}
                   onChange={(e) => setFormTag(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border-card)', background: 'var(--bg-subtle)', color: 'var(--text-main)', fontSize: '0.95rem' }}
@@ -714,10 +656,11 @@ export const HistoryView: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '0.8rem' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  <label htmlFor="add-date" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                     วันที่:
                   </label>
                   <input
+                    id="add-date"
                     type="date"
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
@@ -726,10 +669,11 @@ export const HistoryView: React.FC = () => {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  <label htmlFor="add-time" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                     เวลา:
                   </label>
                   <input
+                    id="add-time"
                     type="text"
                     value={formTime}
                     onChange={(e) => setFormTime(e.target.value)}
@@ -757,39 +701,49 @@ export const HistoryView: React.FC = () => {
         <div className="modal-overlay" onClick={() => setEditingRecord(null)}>
           <div
             className="modal-content-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-modal-title"
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: '440px', padding: '1.8rem' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Pencil size={18} style={{ color: '#3b82f6' }} /> แก้ไขประวัติการโฟกัส
+              <h3 id="edit-modal-title" style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Pencil size={18} style={{ color: '#3b82f6' }} aria-hidden="true" /> แก้ไขประวัติการโฟกัส
               </h3>
-              <button onClick={() => setEditingRecord(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button
+                onClick={() => setEditingRecord(null)}
+                aria-label="ปิดหน้าต่างแก้ไขประวัติ"
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label htmlFor="edit-duration" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                   ระยะเวลาโฟกัส (นาที):
                 </label>
                 <input
+                  id="edit-duration"
                   type="number"
                   min="1"
                   max="1440"
                   value={formDuration}
                   onChange={(e) => setFormDuration(Number(e.target.value))}
                   required
+                  autoFocus
                   style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border-card)', background: 'var(--bg-subtle)', color: 'var(--text-main)', fontSize: '0.95rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label htmlFor="edit-tag" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                   หมวดหมู่:
                 </label>
                 <select
+                  id="edit-tag"
                   value={formTag}
                   onChange={(e) => setFormTag(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border-card)', background: 'var(--bg-subtle)', color: 'var(--text-main)', fontSize: '0.95rem' }}
@@ -802,10 +756,11 @@ export const HistoryView: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '0.8rem' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  <label htmlFor="edit-date" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                     วันที่:
                   </label>
                   <input
+                    id="edit-date"
                     type="date"
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
@@ -814,10 +769,11 @@ export const HistoryView: React.FC = () => {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  <label htmlFor="edit-time" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
                     เวลา:
                   </label>
                   <input
+                    id="edit-time"
                     type="text"
                     value={formTime}
                     onChange={(e) => setFormTime(e.target.value)}

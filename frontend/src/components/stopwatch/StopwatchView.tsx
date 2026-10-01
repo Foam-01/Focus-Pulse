@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LapRecord } from '../../types';
 import { LapTable } from './LapTable';
+import { PageHeader } from '../shared/PageHeader';
 import { Play, Pause, Flag, RotateCcw, Maximize2, X, Sparkles } from 'lucide-react';
 
 export const StopwatchView: React.FC = () => {
@@ -82,28 +83,13 @@ export const StopwatchView: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       {/* Header Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.8rem',
-        }}
-      >
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> นาฬิกาจับเวลา
-          </div>
-          <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            นาฬิกาจับเวลา
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            จับเวลาเดินหน้าและบันทึกเวลาต่อรอบ
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        style={{ marginBottom: '1.8rem' }}
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="นาฬิกาจับเวลา"
+        title="นาฬิกาจับเวลา"
+        description="จับเวลาเดินหน้าและบันทึกเวลาต่อรอบ"
+      />
 
       {/* Main Stopwatch Digital Display Card */}
       <div

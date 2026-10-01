@@ -83,7 +83,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
       if (verify.error) throw verify.error;
 
       setIsEnrolled(true);
-      setStatusMsg('เปิดใช้งานระบบความปลอดภัย 2FA สำเร็จเรียบร้อยแล้ว!');
+      setStatusMsg('เปิดใช้งาน 2FA สำเร็จแล้ว!');
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -116,21 +116,8 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
         {/* Close Button */}
         <button
           onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '1.2rem',
-            right: '1.2rem',
-            background: 'var(--bg-subtle)',
-            border: '1px solid var(--border-card)',
-            color: 'var(--text-main)',
-            borderRadius: '12px',
-            width: '34px',
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
+          className="icon-btn-close"
+          style={{ position: 'absolute', top: '1.2rem', right: '1.2rem' }}
         >
           <X size={18} />
         </button>
@@ -138,13 +125,13 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
         {/* Modal Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 800, marginBottom: '0.3rem' }}>
-            <ShieldCheck size={16} /> การยืนยันตัวตน 2 ชั้น (2FA)
+            <ShieldCheck size={16} /> ความปลอดภัยสองชั้น (2FA)
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)' }}>
             ตั้งค่าความปลอดภัย 2FA
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem', fontWeight: 600 }}>
-            สแกนด้วยแอป Authenticator เช่น Google Authenticator เพื่อเพิ่มความปลอดภัย
+            ผูกแอป Authenticator (เช่น Google Authenticator) เพื่อล็อกบัญชีสองชั้น
           </p>
         </div>
 
@@ -184,7 +171,7 @@ export const MFASecurityModal: React.FC<MFASecurityModalProps> = ({ isOpen, onCl
               <Lock size={28} />
             </div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5, fontWeight: 600 }}>
-              กดปุ่มด้านล่างเพื่อแสดง QR Code สำหรับสแกนผูกแอป Authenticator
+              กด "เริ่มตั้งค่า" เพื่อรับ QR Code สำหรับผูกกับแอป Authenticator
             </p>
             <button
               onClick={handleEnrollMFA}

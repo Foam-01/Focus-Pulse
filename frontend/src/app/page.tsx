@@ -7,16 +7,23 @@ import dynamic from 'next/dynamic';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
 import { DashboardView } from '../components/dashboard/DashboardView';
-import { TimerView } from '../components/timer/TimerView';
 import { LoginPage } from '../components/auth/LoginPage';
 
-// Dynamic imports for secondary views & modals to optimize initial JS bundle size
+// Shared loading card used by all dynamic imports
 const renderLoadingCard = (text: string) => (
   <div className="glass-card" style={{ padding: '3.5rem 2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
     <div style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid var(--border-card)', borderTopColor: 'var(--blue-sky)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: '1rem' }} />
     <div>{text}</div>
   </div>
 );
+
+// A-3: TimerView is large (42KB) — dynamic import reduces initial bundle
+const TimerView = dynamic(
+  () => import('../components/timer/TimerView').then((mod) => mod.TimerView),
+  { loading: () => renderLoadingCard('กำลังโหลดจับเวลา...') }
+);
+
+
 
 const VideoLibraryView = dynamic(
   () => import('../components/videos/VideoLibraryView').then((mod) => mod.VideoLibraryView),
@@ -61,7 +68,17 @@ const MFASecurityModal = dynamic(
 );
 
 export default function HomePage() {
-  const [activeView, setActiveView] = useState<ActiveView>('dashboardView');
+  const [activeView, setActiveView] = useState<ActiveView>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('focus_active_view') as ActiveView | null;
+      const validViews: ActiveView[] = [
+        'dashboardView', 'timerView', 'historyView', 'multiTimerView',
+        'alarmView', 'stopwatchView', 'worldClockView', 'videoLibraryView',
+      ];
+      if (saved && validViews.includes(saved)) return saved;
+    }
+    return 'dashboardView';
+  });
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -77,6 +94,9 @@ export default function HomePage() {
     // Check initial user session
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user || null);
+      setAuthLoading(false);
+    }).catch(() => {
+      setUser(null);
       setAuthLoading(false);
     });
 
@@ -127,7 +147,10 @@ export default function HomePage() {
       {/* Sidebar Navigation */}
       <Sidebar
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={(view) => {
+          setActiveView(view);
+          sessionStorage.setItem('focus_active_view', view);
+        }}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         isMobileOpen={isMobileOpen}
@@ -150,7 +173,10 @@ export default function HomePage() {
 
         {/* Dynamic Section Views */}
         {activeView === 'dashboardView' && (
-          <DashboardView onNavigateToTimer={() => setActiveView('timerView')} />
+          <DashboardView onNavigateToTimer={() => {
+            setActiveView('timerView');
+            sessionStorage.setItem('focus_active_view', 'timerView');
+          }} />
         )}
         {activeView === 'timerView' && <TimerView />}
         {activeView === 'historyView' && <HistoryView />}

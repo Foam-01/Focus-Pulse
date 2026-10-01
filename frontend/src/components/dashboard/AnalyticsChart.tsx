@@ -135,13 +135,13 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = React.memo(({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.2rem', marginBottom: '1.6rem', position: 'relative', zIndex: 2 }}>
         <div>
           <div style={{ color: 'var(--blue-sky)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
-            สถิตีย้อนหลัง
+            สถิติย้อนหลัง
           </div>
           <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
             สถิติเวลาโฟกัส
           </h2>
           <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.2rem', margin: 0, fontWeight: 500 }}>
-            แสดงเวลาทำงานย้อนหลังตามช่วงเวลาที่เลือก
+            เลือกช่วงเวลาเพื่อดูสถิติ
           </p>
         </div>
 

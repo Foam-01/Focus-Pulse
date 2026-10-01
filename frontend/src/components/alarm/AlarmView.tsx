@@ -5,6 +5,8 @@ import { AlarmItem } from '../../types';
 import { AlarmCard } from './AlarmCard';
 import { AddAlarmModal } from './AddAlarmModal';
 import { AlarmRingingModal } from './AlarmRingingModal';
+import { getPaginationRange } from '../../utils/pagination';
+import { PageHeader } from '../shared/PageHeader';
 import { Plus, Bell, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DEFAULT_ALARMS: AlarmItem[] = [
@@ -84,19 +86,8 @@ export const AlarmView: React.FC = () => {
     return alarms.slice(startIndex, endIndex);
   }, [alarms, startIndex, endIndex]);
 
-  // Helper for generating page numbers with dots
-  const getPaginationRange = (current: number, total: number) => {
-    if (total <= 7) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
-    if (current <= 4) {
-      return [1, 2, 3, 4, 5, '...', total];
-    }
-    if (current >= total - 3) {
-      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-    }
-    return [1, '...', current - 1, current, current + 1, '...', total];
-  };
+  // Helper for generating page numbers with dots (via shared util)
+  // See: src/utils/pagination.ts
 
   // Real-Time Clock Listener
   useEffect(() => {
@@ -191,45 +182,31 @@ export const AlarmView: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       {/* Header Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.8rem',
-        }}
-      >
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> ระบบแจ้งเตือน
-          </div>
-          <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            นาฬิกาปลุก
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            ตั้งเวลาปลุกและกำหนดวันแจ้งเตือนซ้ำ
-          </p>
-        </div>
-
-        <button
-          className="btn-primary-gradient"
-          onClick={() => setIsAddModalOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.4rem',
-            borderRadius: '14px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          <Plus size={18} />
-          <span>เพิ่มนาฬิกาปลุก</span>
-        </button>
-      </div>
+      <PageHeader
+        style={{ marginBottom: '1.8rem' }}
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="ระบบแจ้งเตือน"
+        title="นาฬิกาปลุก"
+        description="ตั้งเวลาปลุกและกำหนดวันแจ้งเตือนซ้ำ"
+        actions={
+          <button
+            className="btn-primary-gradient"
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1.4rem',
+              borderRadius: '14px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            <Plus size={18} />
+            <span>เพิ่มนาฬิกาปลุก</span>
+          </button>
+        }
+      />
 
       {/* Alarms Grid Display */}
       {alarms.length === 0 ? (

@@ -107,7 +107,24 @@ export class AnalyticsService {
         chartMap.set(key, dayTotal);
       }
     } else if (timeframe === 'week') {
+      // Perf fallback (safer than a Prisma groupBy on the string `date` field,
+      // which risks subtly different bucket-edge semantics): pre-filter the
+      // full history array ONCE to the overall needed date range (last 4
+      // weeks), then scan only that smaller filtered array per bucket instead
+      // of the full history array each time. Output is identical to before.
       const now = new Date();
+      const overallStart = new Date();
+      overallStart.setDate(now.getDate() - (4 * 7 - 1));
+      overallStart.setHours(0, 0, 0, 0);
+      const overallEnd = new Date();
+      overallEnd.setHours(23, 59, 59, 999);
+
+      const relevantHistory = history.filter((rec) => {
+        if (!rec.date) return false;
+        const recDate = new Date(rec.date);
+        return recDate >= overallStart && recDate <= overallEnd;
+      });
+
       for (let i = 3; i >= 0; i--) {
         const weekNum = 4 - i;
         const label = `สัปดาห์ ${weekNum}`;
@@ -123,31 +140,37 @@ export class AnalyticsService {
         endDate.setHours(23, 59, 59, 999);
 
         let weekTotal = 0;
-        history.forEach((rec) => {
-          if (rec.date) {
-            const recDate = new Date(rec.date);
-            if (recDate >= startDate && recDate <= endDate) {
-              weekTotal += rec.duration;
-            }
+        relevantHistory.forEach((rec) => {
+          const recDate = new Date(rec.date);
+          if (recDate >= startDate && recDate <= endDate) {
+            weekTotal += rec.duration;
           }
         });
         chartMap.set(label, weekTotal);
       }
     } else {
+      // Same fallback approach for month: pre-filter once to the 6 relevant
+      // yearMonth prefixes, then scan only that filtered array per bucket.
+      const monthBuckets: { label: string; yearMonth: string }[] = [];
       for (let i = 5; i >= 0; i--) {
         const d = new Date();
         d.setMonth(d.getMonth() - i);
         const label = d.toLocaleDateString('th-TH', { month: 'short' });
         const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthBuckets.push({ label, yearMonth });
+      }
+      const yearMonthSet = new Set(monthBuckets.map((b) => b.yearMonth));
+      const relevantHistory = history.filter((rec) => rec.date && yearMonthSet.has(rec.date.slice(0, 7)));
 
+      monthBuckets.forEach(({ label, yearMonth }) => {
         let monthTotal = 0;
-        history.forEach((rec) => {
+        relevantHistory.forEach((rec) => {
           if (rec.date && rec.date.startsWith(yearMonth)) {
             monthTotal += rec.duration;
           }
         });
         chartMap.set(label, monthTotal);
-      }
+      });
     }
 
     return Array.from(chartMap.entries()).map(([label, value]) => ({ label, value }));

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ActiveView, AuthUser } from '../../types';
-import { Sun, Moon, Menu } from 'lucide-react';
+import { Sun, Moon, Menu, History } from 'lucide-react';
 import { UserProfileMenu } from '../auth/UserProfileMenu';
 
 interface HeaderProps {
@@ -19,7 +19,7 @@ interface HeaderProps {
 const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
   dashboardView: {
     title: 'แดชบอร์ด',
-    sub: 'สรุปสถิติเวลาทำงานและเป้าหมายรายวัน',
+    sub: 'ภาพรวมวันนี้และเป้าหมายโฟกัส',
   },
   timerView: {
     title: 'จับเวลาโฟกัส',
@@ -43,7 +43,7 @@ const HEADER_TITLES: Record<ActiveView, { title: string; sub: string }> = {
   },
   videoLibraryView: {
     title: 'คลังวิดีโอพักสายตา',
-    sub: 'วิดีโอพักสายตาระหว่างช่วงพัก',
+    sub: 'เปิดวิดีโอผ่อนคลายระหว่างพัก',
   },
   historyView: {
     title: 'ประวัติการโฟกัส',
@@ -101,13 +101,32 @@ export const Header: React.FC<HeaderProps> = ({
 
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <button
+          onClick={onOpenHistoryModal}
+          title="ดูประวัติโฟกัสด่วน"
+          aria-label="เปิดหน้าต่างดูประวัติโฟกัสด่วน"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            color: 'var(--text-main)',
+            borderRadius: '12px',
+            padding: '0.55rem',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <History size={18} />
+        </button>
+
+        <button
           className="theme-toggle-btn"
           onClick={toggleTheme}
           title="สลับธีม"
           aria-label={theme === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'}
         >
           {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-          <span>{theme === 'dark' ? 'มืด' : 'สว่าง'}</span>
+          <span className="theme-label">{theme === 'dark' ? 'มืด' : 'สว่าง'}</span>
         </button>
 
         {/* User Profile / Login Button */}

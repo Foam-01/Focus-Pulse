@@ -23,19 +23,40 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return {
       'Content-Type': 'application/json',
       'x-user-id': userId,
+      'x-user-email': data.user?.email || '',
     };
   } catch {
     return { 'Content-Type': 'application/json', 'x-user-id': 'guest' };
   }
 }
 
+// Short-TTL module-level cache for getVideos(), to avoid redundant repeated
+// fetch+localStorage-merge work when called back-to-back in a short window
+// (e.g. after a sequence of video CRUD mutations). Does not change return
+// value/behavior when the cache is stale or missing.
+let videosCache: { data: VideoItem[]; expiresAt: number } | null = null;
+const VIDEOS_CACHE_TTL_MS = 8000;
+
+function invalidateVideosCache(): void {
+  videosCache = null;
+}
+
 export const ApiService = {
   // --- Focus Sessions History ---
-  async getHistory(): Promise<FocusSessionRecord[]> {
+  async getHistory(page?: number, pageSize?: number, tag?: string, search?: string): Promise<FocusSessionRecord[]> {
     const headers = await getAuthHeaders();
     const userId = headers['x-user-id'];
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/focus/history`, { headers });
+      // page/pageSize/tag/search are all OPTIONAL — omitting them preserves the
+      // existing behavior of fetching the full, unfiltered history list.
+      const params = [
+        page !== undefined ? `page=${page}` : '',
+        pageSize !== undefined ? `pageSize=${pageSize}` : '',
+        tag !== undefined ? `tag=${encodeURIComponent(tag)}` : '',
+        search !== undefined ? `search=${encodeURIComponent(search)}` : '',
+      ].filter(Boolean);
+      const qs = params.length > 0 ? `?${params.join('&')}` : '';
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history${qs}`, { headers });
       if (res.ok) {
         return await res.json();
       }
@@ -44,6 +65,46 @@ export const ApiService = {
     }
     const local = localStorage.getItem(`focus_history_list_${userId}`);
     return local ? JSON.parse(local) : [];
+  },
+
+  // Lightweight aggregate stats (count / total minutes / per-tag counts) without
+  // downloading the full history list. Falls back to computing from LocalStorage
+  // when the backend is unreachable, matching the previous client-computed stats.
+  async getHistoryStats(tag?: string, search?: string): Promise<{ totalCount: number; totalMinutes: number; tagCounts: Record<string, number> }> {
+    const headers = await getAuthHeaders();
+    const userId = headers['x-user-id'];
+    try {
+      const params = [
+        tag !== undefined ? `tag=${encodeURIComponent(tag)}` : '',
+        search !== undefined ? `search=${encodeURIComponent(search)}` : '',
+      ].filter(Boolean);
+      const qs = params.length > 0 ? `?${params.join('&')}` : '';
+      const res = await fetchWithTimeout(`${API_BASE}/focus/history/stats${qs}`, { headers });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Backend API unreachable, computing stats from LocalStorage fallback.');
+    }
+
+    // LocalStorage fallback: replicate the same filter predicate used before.
+    const local = localStorage.getItem(`focus_history_list_${userId}`);
+    const all: FocusSessionRecord[] = local ? JSON.parse(local) : [];
+    const matches = (item: FocusSessionRecord) => {
+      const matchesSearch = !search
+        || item.tag.toLowerCase().includes(search.toLowerCase())
+        || item.date.includes(search)
+        || item.time.includes(search);
+      const matchesTag = !tag || tag === 'all' || item.tag === tag;
+      return matchesSearch && matchesTag;
+    };
+    const filtered = all.filter(matches);
+    const totalMinutes = filtered.reduce((acc, curr) => acc + curr.duration, 0);
+    const tagCounts: Record<string, number> = {};
+    all.forEach((item) => {
+      tagCounts[item.tag] = (tagCounts[item.tag] || 0) + 1;
+    });
+    return { totalCount: filtered.length, totalMinutes, tagCounts };
   },
 
   async createSession(session: { date?: string; time?: string; duration: number; tag?: string }): Promise<FocusSessionRecord> {
@@ -282,6 +343,10 @@ export const ApiService = {
 
   // --- Video Library ---
   async getVideos(): Promise<VideoItem[]> {
+    if (videosCache && videosCache.expiresAt > Date.now()) {
+      return videosCache.data;
+    }
+
     let backendList: VideoItem[] = [];
 
     try {
@@ -362,7 +427,9 @@ export const ApiService = {
     const finalSorted = combined.map((v) => ({ ...v, isPrimary: v.id === primaryId }));
 
     // Always sort Primary Video to Position #1 (index 0)
-    return finalSorted.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+    const result = finalSorted.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+    videosCache = { data: result, expiresAt: Date.now() + VIDEOS_CACHE_TTL_MS };
+    return result;
   },
 
   async getPrimaryVideo(): Promise<VideoItem> {
@@ -395,11 +462,13 @@ export const ApiService = {
       if (res.ok) {
         const updated = await res.json();
         localStorage.setItem('primary_video_id', id);
+        invalidateVideosCache();
         return updated;
       }
     } catch (e) {}
 
     localStorage.setItem('primary_video_id', id);
+    invalidateVideosCache();
     const videos = await this.getVideos();
     const found = videos.find((v) => v.id === id);
     return found ? { ...found, isPrimary: true } : videos[0];
@@ -418,6 +487,7 @@ export const ApiService = {
         body: formData,
       }, 5000);
       if (res.ok) {
+        invalidateVideosCache();
         return await res.json();
       }
     } catch (e) {
@@ -447,6 +517,7 @@ export const ApiService = {
     } catch (err) {
       console.warn('LocalStorage quota exceeded for video, using session state.');
     }
+    invalidateVideosCache();
     return newVideo;
   },
 
@@ -458,6 +529,7 @@ export const ApiService = {
         body: JSON.stringify(updates),
       });
       if (res.ok) {
+        invalidateVideosCache();
         return await res.json();
       }
     } catch (e) {}
@@ -501,6 +573,7 @@ export const ApiService = {
       const updated = customList.filter((v) => v.id !== id);
       localStorage.setItem('custom_videos_list', JSON.stringify(updated));
     }
+    invalidateVideosCache();
     return true;
   },
 };

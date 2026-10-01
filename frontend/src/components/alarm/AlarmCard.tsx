@@ -12,13 +12,13 @@ interface AlarmCardProps {
 }
 
 const DAY_BADGES = [
-  { dayIndex: 1, label: 'M' },
-  { dayIndex: 2, label: 'Tu' },
-  { dayIndex: 3, label: 'We' },
-  { dayIndex: 4, label: 'Th' },
-  { dayIndex: 5, label: 'Fri' },
-  { dayIndex: 6, label: 'Sa' },
-  { dayIndex: 0, label: 'Su' },
+  { dayIndex: 1, label: 'จ.' },
+  { dayIndex: 2, label: 'อ.' },
+  { dayIndex: 3, label: 'พ.' },
+  { dayIndex: 4, label: 'พฤ.' },
+  { dayIndex: 5, label: 'ศ.' },
+  { dayIndex: 6, label: 'ส.' },
+  { dayIndex: 0, label: 'อา.' },
 ];
 
 export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete, onEdit }) => {
@@ -60,7 +60,7 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete,
         padding: '1.6rem 1.8rem',
         opacity: alarm.isEnabled ? 1 : 0.65,
         boxShadow: alarm.isEnabled ? 'var(--shadow-sm)' : 'none',
-        transition: 'all 0.25s ease',
+        transition: 'var(--transition)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -73,19 +73,7 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete,
           {onEdit && (
             <button
               onClick={() => onEdit(alarm)}
-              style={{
-                background: 'var(--bg-subtle)',
-                border: '1px solid var(--border-card)',
-                color: 'var(--blue-sky)',
-                borderRadius: '8px',
-                width: '30px',
-                height: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
+              className="icon-btn-action"
               title="แก้ไขการตั้งค่านาฬิกาปลุก"
             >
               <Pencil size={14} />
@@ -94,19 +82,7 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete,
 
           <button
             onClick={() => onDelete(alarm.id)}
-            style={{
-              background: 'rgba(244, 63, 94, 0.08)',
-              border: '1px solid rgba(244, 63, 94, 0.2)',
-              color: '#f43f5e',
-              borderRadius: '8px',
-              width: '30px',
-              height: '30px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
+            className="icon-btn-danger"
             title="ลบรายการปลุกนี้"
           >
             <Trash2 size={14} />
@@ -115,7 +91,12 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete,
 
         {/* Toggle Switch */}
         <div
+          role="switch"
+          aria-checked={alarm.isEnabled}
+          aria-label={`เปิด/ปิดนาฬิกาปลุก ${alarm.label}`}
+          tabIndex={0}
           onClick={() => onToggle(alarm.id)}
+          onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? onToggle(alarm.id) : undefined}
           style={{
             width: '48px',
             height: '26px',
@@ -124,7 +105,7 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete,
             border: '1px solid var(--border-card)',
             padding: '3px',
             cursor: 'pointer',
-            transition: 'all 0.25s ease',
+            transition: 'var(--transition)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: alarm.isEnabled ? 'flex-end' : 'flex-start',

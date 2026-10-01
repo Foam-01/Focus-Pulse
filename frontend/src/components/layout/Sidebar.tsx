@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isMobileOpen && (
         <div
           onClick={onCloseMobile}
+          aria-hidden="true"
           style={{
             position: 'fixed',
             inset: 0,
@@ -113,6 +114,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 if (onCloseMobile) onCloseMobile();
               }}
               title={item.title}
+              aria-label={item.title}
+              aria-current={activeView === item.id ? 'page' : undefined}
             >
               <div className="nav-icon">{item.icon}</div>
               <span className="nav-text">{item.title}</span>

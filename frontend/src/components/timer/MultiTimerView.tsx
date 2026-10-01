@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MultiTimerPreset } from '../../types';
 import { MultiTimerCard } from './MultiTimerCard';
 import { AddTimerModal } from './AddTimerModal';
+import { getPaginationRange } from '../../utils/pagination';
+import { PageHeader } from '../shared/PageHeader';
 import { Plus, Clock, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DEFAULT_PRESETS: MultiTimerPreset[] = [
@@ -52,19 +54,8 @@ export const MultiTimerView: React.FC = () => {
     return timers.slice(startIndex, endIndex);
   }, [timers, startIndex, endIndex]);
 
-  // Helper for generating page numbers with dots
-  const getPaginationRange = (current: number, total: number) => {
-    if (total <= 7) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
-    if (current <= 4) {
-      return [1, 2, 3, 4, 5, '...', total];
-    }
-    if (current >= total - 3) {
-      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-    }
-    return [1, '...', current - 1, current, current + 1, '...', total];
-  };
+  // Helper for generating page numbers with dots (via shared util)
+  // See: src/utils/pagination.ts
 
   const handleAddTimer = (title: string, totalSeconds: number) => {
     const newTimer: MultiTimerPreset = {
@@ -86,45 +77,31 @@ export const MultiTimerView: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       {/* Top Header & Action Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.8rem',
-        }}
-      >
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--blue-sky)', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-            <Sparkles size={14} /> ตัวจับเวลานับถอยหลัง
-          </div>
-          <h2 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            นาฬิกาหลายเรือน
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            จัดการตัวนับถอยหลังหลายรายการพร้อมกัน
-          </p>
-        </div>
-
-        <button
-          className="btn-primary-gradient"
-          onClick={() => setIsAddModalOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.4rem',
-            borderRadius: '14px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          <Plus size={18} />
-          <span>เพิ่มตัวจับเวลา</span>
-        </button>
-      </div>
+      <PageHeader
+        style={{ marginBottom: '1.8rem' }}
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="นับถอยหลัง"
+        title="นาฬิกาหลายเรือน"
+        description="รันหลายนาฬิกาพร้อมกันได้เลย"
+        actions={
+          <button
+            className="btn-primary-gradient"
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1.4rem',
+              borderRadius: '14px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            <Plus size={18} />
+            <span>เพิ่มตัวจับเวลา</span>
+          </button>
+        }
+      />
 
       {/* Timer Grid Display */}
       {timers.length === 0 ? (

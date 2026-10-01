@@ -96,7 +96,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                 onClose();
               }, 800);
             } else {
-              setSuccessMsg('สมัครสมาชิกสำเร็จแล้ว! คุณสามารถเข้าสู่ระบบได้ทันที');
+              setSuccessMsg('สมัครสมาชิกสำเร็จแล้ว! กรุณาตรวจสอบอีเมลของคุณเพื่อกดยืนยันบัญชี ก่อนเข้าสู่ระบบ');
               setMode('login');
             }
           }
@@ -120,9 +120,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     } catch (err: any) {
       let rawMsg = err.message || '';
       if (rawMsg.includes('Invalid login credentials')) {
-        setErrorMsg('อีเมลหรือรหัสผ่านไม่ถูกต้อง (หากเพิ่งสมัครสมาชิก โปรดปิด Confirm Email ใน Supabase Dashboard)');
+        setErrorMsg('อีเมลหรือรหัสผ่านไม่ถูกต้อง หากเพิ่งสมัครสมาชิก กรุณายืนยันอีเมลของคุณก่อนเข้าสู่ระบบ');
       } else if (rawMsg.includes('rate limit')) {
-        setErrorMsg('เกินโควตาการส่งอีเมลของ Supabase ชั่วคราว (Email Rate Limit) 💡 วิธีแก้: เข้า Supabase Dashboard -> Authentication -> Providers -> Email -> ปิด Confirm email');
+        setErrorMsg('ระบบมีคำขอเข้ามาเยอะในขณะนี้ กรุณาลองใหม่อีกครั้งในอีกสักครู่');
       } else if (rawMsg.includes('invalid') || rawMsg.includes('Email address')) {
         setErrorMsg('รูปแบบอีเมลไม่ถูกต้อง โปรดตรวจสอบช่องว่างหรือลองใช้อีเมลอื่น');
       } else if (rawMsg.includes('already registered')) {
@@ -132,26 +132,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
-    setErrorMsg('');
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      let rawMsg = err.message || '';
-      if (rawMsg.includes('not enabled') || rawMsg.includes('Unsupported provider')) {
-        setErrorMsg(`ระบบล็อกอินผ่าน ${provider.toUpperCase()} ยังไม่ได้ถูกเปิดใช้งานใน Supabase Dashboard (Authentication -> Providers -> ${provider.toUpperCase()}) โปรดเข้าสู่ระบบด้วย อีเมล และ รหัสผ่าน ด้านบนครับ`);
-      } else {
-        setErrorMsg(rawMsg || `เกิดข้อผิดพลาดในการล็อกอินผ่าน ${provider}`);
-      }
     }
   };
 
@@ -221,7 +201,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             {mode === 'login' ? 'เข้าสู่ระบบ Focus Pulse' : 'สมัครสมาชิกใหม่'}
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem', fontWeight: 600 }}>
-            {mode === 'login' ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ' : 'สร้างบัญชีใหม่เพื่อเริ่มบันทึกข้อมูล'}
+            {mode === 'login' ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่เริ่มบันทึกข้อมูลได้เลย'}
           </p>
         </div>
 
@@ -312,7 +292,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
           <div>
             <label style={{ fontSize: '0.86rem', color: 'var(--text-main)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
-              อีเมล (Email Address)
+              อีเมล
             </label>
             <input
               type="email"
@@ -326,7 +306,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
           <div>
             <label style={{ fontSize: '0.86rem', color: 'var(--text-main)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
-              รหัสผ่าน (Password)
+              รหัสผ่าน
             </label>
             <input
               type="password"
@@ -356,7 +336,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             }}
           >
             {loading ? (
-              <span>กำลังยืนยันข้อมูล...</span>
+              <span>{mode === 'login' ? 'กำลังเข้าสู่ระบบ...' : 'กำลังสมัครสมาชิก...'}</span>
             ) : mode === 'login' ? (
               <span>เข้าสู่ระบบ</span>
             ) : (
@@ -364,73 +344,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             )}
           </button>
         </form>
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', margin: '1.4rem 0', gap: '0.8rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-card)' }} />
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>หรือเข้าสู่ระบบด้วย</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-card)' }} />
-        </div>
-
-        {/* Official Branded OAuth Buttons */}
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {/* Google Button */}
-          <button
-            type="button"
-            onClick={() => handleOAuthLogin('google')}
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              borderRadius: '14px',
-              border: '1px solid var(--border-card)',
-              background: 'var(--bg-subtle)',
-              color: 'var(--text-main)',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#ea4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
-              <path fill="#4285f4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
-              <path fill="#fbbc05" d="M5.6 14.8c-.3-.8-.4-1.8-.4-2.8s.1-2 .4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
-              <path fill="#34a853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
-            </svg>
-            <span>Google</span>
-          </button>
-
-          {/* GitHub Button */}
-          <button
-            type="button"
-            onClick={() => handleOAuthLogin('github')}
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              borderRadius: '14px',
-              border: '1px solid var(--border-card)',
-              background: 'var(--bg-subtle)',
-              color: 'var(--text-main)',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-            </svg>
-            <span>GitHub</span>
-          </button>
-        </div>
       </div>
     </div>
   );

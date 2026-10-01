@@ -10,16 +10,55 @@ interface MultiTimerCardProps {
   onDelete: (id: string) => void;
 }
 
+// --- localStorage helpers ---
+const STORAGE_KEY_PREFIX = 'focus_timer_state_';
+
+interface TimerPersistedState {
+  remainingSeconds: number;
+  isRunning: boolean;
+  isCompleted: boolean;
+  startedAt: number | null; // epoch ms when timer started/resumed, null if paused
+}
+
+const loadTimerState = (id: string, totalSeconds: number): TimerPersistedState => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + id);
+    if (!raw) return { remainingSeconds: totalSeconds, isRunning: false, isCompleted: false, startedAt: null };
+    const parsed: TimerPersistedState = JSON.parse(raw);
+    // If was running, calculate elapsed time since startedAt
+    if (parsed.isRunning && parsed.startedAt && !parsed.isCompleted) {
+      const elapsedMs = Date.now() - parsed.startedAt;
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      const adjustedRemaining = parsed.remainingSeconds - elapsedSeconds;
+      if (adjustedRemaining <= 0) {
+        return { remainingSeconds: 0, isRunning: false, isCompleted: true, startedAt: null };
+      }
+      return { ...parsed, remainingSeconds: adjustedRemaining, startedAt: Date.now() };
+    }
+    return parsed;
+  } catch {
+    return { remainingSeconds: totalSeconds, isRunning: false, isCompleted: false, startedAt: null };
+  }
+};
+
+const saveTimerState = (id: string, state: TimerPersistedState) => {
+  localStorage.setItem(STORAGE_KEY_PREFIX + id, JSON.stringify(state));
+};
+
 export const MultiTimerCard: React.FC<MultiTimerCardProps> = ({
   id,
   title,
   totalSeconds,
   onDelete,
 }) => {
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(totalSeconds);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  // Restore state from localStorage on first mount
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(() => loadTimerState(id, totalSeconds).remainingSeconds);
+  const [isRunning, setIsRunning] = useState<boolean>(() => loadTimerState(id, totalSeconds).isRunning);
+  const [isCompleted, setIsCompleted] = useState<boolean>(() => loadTimerState(id, totalSeconds).isCompleted);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  // Track startedAt in a ref (not state, doesn't need to trigger re-render)
+  const startedAtRef = useRef<number | null>(loadTimerState(id, totalSeconds).startedAt);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -27,30 +66,42 @@ export const MultiTimerCard: React.FC<MultiTimerCardProps> = ({
     setRemainingSeconds(totalSeconds);
     setIsRunning(false);
     setIsCompleted(false);
+    startedAtRef.current = null;
+    saveTimerState(id, { remainingSeconds: totalSeconds, isRunning: false, isCompleted: false, startedAt: null });
   }, [totalSeconds]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
     if (isRunning) {
+      startedAtRef.current = Date.now();
       interval = setInterval(() => {
         setRemainingSeconds((prev) => {
-          if (prev <= 1) {
+          const next = prev <= 1 ? 0 : prev - 1;
+          if (next <= 0) {
             setIsRunning(false);
             setIsCompleted(true);
             triggerAlarmSound();
-            return 0;
+            saveTimerState(id, { remainingSeconds: 0, isRunning: false, isCompleted: true, startedAt: null });
+            startedAtRef.current = null;
+          } else {
+            // Save every tick with current startedAt so refresh can recalculate
+            saveTimerState(id, { remainingSeconds: next, isRunning: true, isCompleted: false, startedAt: startedAtRef.current });
           }
-          return prev - 1;
+          return next;
         });
       }, 1000);
-    } else if (interval) {
-      clearInterval(interval);
+    } else {
+      // Paused — save current remaining with no startedAt
+      if (interval) clearInterval(interval);
+      startedAtRef.current = null;
+      saveTimerState(id, { remainingSeconds, isRunning: false, isCompleted, startedAt: null });
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunning]);
 
   const triggerAlarmSound = () => {
@@ -72,11 +123,23 @@ export const MultiTimerCard: React.FC<MultiTimerCardProps> = ({
 
   const handleTogglePlay = () => {
     if (remainingSeconds <= 0) {
-      setRemainingSeconds(totalSeconds);
+      // Restart from full
+      const newRemaining = totalSeconds;
+      setRemainingSeconds(newRemaining);
       setIsCompleted(false);
       setIsRunning(true);
+      startedAtRef.current = Date.now();
+      saveTimerState(id, { remainingSeconds: newRemaining, isRunning: true, isCompleted: false, startedAt: startedAtRef.current });
     } else {
-      setIsRunning(!isRunning);
+      const next = !isRunning;
+      setIsRunning(next);
+      if (next) {
+        startedAtRef.current = Date.now();
+        saveTimerState(id, { remainingSeconds, isRunning: true, isCompleted: false, startedAt: startedAtRef.current });
+      } else {
+        startedAtRef.current = null;
+        saveTimerState(id, { remainingSeconds, isRunning: false, isCompleted: false, startedAt: null });
+      }
     }
   };
 
@@ -84,6 +147,8 @@ export const MultiTimerCard: React.FC<MultiTimerCardProps> = ({
     setIsRunning(false);
     setIsCompleted(false);
     setRemainingSeconds(totalSeconds);
+    startedAtRef.current = null;
+    saveTimerState(id, { remainingSeconds: totalSeconds, isRunning: false, isCompleted: false, startedAt: null });
   };
 
   const formatTimeStr = (secs: number) => {
@@ -211,7 +276,7 @@ export const MultiTimerCard: React.FC<MultiTimerCardProps> = ({
               </span>
               {isCompleted && (
                 <span style={{ fontSize: '0.75rem', color: '#f43f5e', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.2rem' }}>
-                  <Bell size={12} /> หมดเวลาแล้ว!
+                  <Bell size={12} /> ครบเวลาแล้ว!
                 </span>
               )}
             </div>

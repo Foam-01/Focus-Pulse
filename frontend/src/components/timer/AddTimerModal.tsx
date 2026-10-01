@@ -22,7 +22,7 @@ export const AddTimerModal: React.FC<AddTimerModalProps> = ({ isOpen, onClose, o
     e.preventDefault();
     const totalSecs = hours * 3600 + minutes * 60 + seconds;
     if (totalSecs <= 0) {
-      setError('โปรดระบุเวลาอย่างน้อย 1 วินาที');
+      setError('กรุณาใส่เวลาอย่างน้อย 1 วินาที');
       return;
     }
 
@@ -60,24 +60,13 @@ export const AddTimerModal: React.FC<AddTimerModalProps> = ({ isOpen, onClose, o
               <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
                 เพิ่มตัวจับเวลาใหม่
               </h3>
-              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>กำหนดชื่อและระยะเวลาการจับเวลา</span>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>ตั้งชื่อและระยะเวลา</span>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            style={{
-              background: 'var(--bg-subtle)',
-              border: '1px solid var(--border-card)',
-              color: 'var(--text-main)',
-              borderRadius: '10px',
-              width: '34px',
-              height: '34px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
+            className="icon-btn-close"
           >
             <X size={18} />
           </button>
@@ -125,17 +114,13 @@ export const AddTimerModal: React.FC<AddTimerModalProps> = ({ isOpen, onClose, o
                   max={23}
                   value={hours}
                   onChange={(e) => setHours(Math.max(0, parseInt(e.target.value || '0', 10)))}
+                  className="app-input-inline"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    borderRadius: '12px',
-                    background: 'var(--bg-subtle)',
-                    border: '1px solid var(--border-card)',
-                    color: 'var(--text-main)',
                     fontSize: '1.1rem',
                     fontWeight: 700,
                     textAlign: 'center',
-                    outline: 'none',
                   }}
                 />
               </div>
@@ -148,17 +133,13 @@ export const AddTimerModal: React.FC<AddTimerModalProps> = ({ isOpen, onClose, o
                   max={59}
                   value={minutes}
                   onChange={(e) => setMinutes(Math.max(0, Math.min(59, parseInt(e.target.value || '0', 10))))}
+                  className="app-input-inline"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    borderRadius: '12px',
-                    background: 'var(--bg-subtle)',
-                    border: '1px solid var(--border-card)',
-                    color: 'var(--text-main)',
                     fontSize: '1.1rem',
                     fontWeight: 700,
                     textAlign: 'center',
-                    outline: 'none',
                   }}
                 />
               </div>
@@ -171,17 +152,13 @@ export const AddTimerModal: React.FC<AddTimerModalProps> = ({ isOpen, onClose, o
                   max={59}
                   value={seconds}
                   onChange={(e) => setSeconds(Math.max(0, Math.min(59, parseInt(e.target.value || '0', 10))))}
+                  className="app-input-inline"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    borderRadius: '12px',
-                    background: 'var(--bg-subtle)',
-                    border: '1px solid var(--border-card)',
-                    color: 'var(--text-main)',
                     fontSize: '1.1rem',
                     fontWeight: 700,
                     textAlign: 'center',
-                    outline: 'none',
                   }}
                 />
               </div>

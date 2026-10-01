@@ -6,7 +6,8 @@ import { ApiService } from '../../services/api';
 import { KPICard } from './KPICard';
 import { AnalyticsChart } from './AnalyticsChart';
 import { GoalStepper } from './GoalStepper';
-import { Timer, ArrowRight } from 'lucide-react';
+import { PageHeader } from '../shared/PageHeader';
+import { Timer, ArrowRight, Sparkles } from 'lucide-react';
 
 interface DashboardViewProps {
   onNavigateToTimer?: () => void;
@@ -54,6 +55,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigateToTimer 
 
   return (
     <div>
+      {/* Header Bar */}
+      <PageHeader
+        style={{ marginBottom: '1.8rem' }}
+        eyebrowIcon={<Sparkles size={14} />}
+        eyebrowText="ภาพรวม"
+        title="แดชบอร์ด"
+        description="ภาพรวมวันนี้และเป้าหมายโฟกัส"
+      />
+
       {/* Quick Action CTA Banner for First-Time / Returning Users */}
       {onNavigateToTimer && (
         <div
@@ -77,10 +87,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigateToTimer 
             </div>
             <div>
               <h3 style={{ fontFamily: 'Prompt, sans-serif', fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                พร้อมเริ่มโฟกัสงานตอนนี้หรือยัง?
+                พร้อมโฟกัสแล้วใช่ไหม?
               </h3>
               <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0.15rem 0 0 0' }}>
-                กดปุ่มเริ่มจับเวลาเพื่อสะสมนาทีโฟกัสและพิชิตเป้าหมายประจำวันของคุณ
+                สะสมนาทีโฟกัส พิชิตเป้าหมายรายวันของคุณ
               </p>
             </div>
           </div>
@@ -123,9 +133,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigateToTimer 
           borderColor="rgba(245, 158, 11, 0.25)"
         />
         <KPICard
-          title="ทำต่อเนื่อง"
+          title="Streak"
           value={`${summary.streakDays} วัน`}
-          sub="สะสมต่อเนื่อง"
+          sub="วันติดต่อกัน"
           accentColor="#f472b6"
           bgTint="rgba(236, 72, 153, 0.08)"
           borderColor="rgba(236, 72, 153, 0.25)"

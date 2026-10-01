@@ -37,7 +37,7 @@ export const GoalStepper: React.FC<GoalStepperProps> = ({ dailyGoalMinutes, onUp
               ตั้งเป้าหมายเวลาโฟกัส
             </h3>
             <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              ตั้งเป้าหมายเวลาทำงานต่อวัน
+              วันละกี่ชั่วโมง?
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export const GoalStepper: React.FC<GoalStepperProps> = ({ dailyGoalMinutes, onUp
 
       {/* Preset Goal Pills */}
       <div style={{ marginTop: '1.4rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-card)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>เป้าหมายสำเร็จรูป:</span>
+        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>เลือกเป้าหมายด่วน:</span>
         {presets.map((p) => {
           const isActive = dailyGoalMinutes === p.value;
           return (
